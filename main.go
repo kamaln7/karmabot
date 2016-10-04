@@ -19,6 +19,7 @@ var (
 	leaderboardRegexp = regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`)
 	slackUserRegexp   = regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`)
 
+	debug                       bool
 	maxPoints, leaderboardLimit int
 	bot                         *slack.Client
 	rtm                         *slack.RTM
@@ -32,11 +33,13 @@ func main() {
 		flagDBPath           = flag.String("db", "./db.sqlite3", "path to sqlite database")
 		flagMaxPoints        = flag.Int("maxpoints", 6, "the maximum amount of points that users can give/take at once")
 		flagLeaderboardLimit = flag.Int("leaderboardLimit", 10, "the default amount of users to list in the leaderboard")
+		flagDebug            = flag.Bool("debug", false, "set debug mode")
 	)
 
 	flag.Parse()
 	maxPoints = *flagMaxPoints
 	leaderboardLimit = *flagLeaderboardLimit
+	debug = *flagDebug
 	if *flagToken == "" {
 		ll.Fatalln("please pass the slack RTM token using the -token option")
 	}
@@ -45,7 +48,7 @@ func main() {
 
 	bot = slack.New(*flagToken)
 	slack.SetLogger(ll)
-	bot.SetDebug(true)
+	bot.SetDebug(debug)
 
 	rtm = bot.NewRTM()
 	go rtm.ManageConnection()
@@ -188,9 +191,9 @@ func handleError(err error, to string) bool {
 func parseUser(user string) (string, error) {
 	if match := slackUserRegexp.FindStringSubmatch(user); len(match) > 0 {
 		return getUserNameByID(match[1])
-	} else {
-		return user, nil
 	}
+
+	return user, nil
 }
 
 func getUserNameByID(id string) (string, error) {

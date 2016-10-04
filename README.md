@@ -7,11 +7,11 @@ Karmabot is a Slack bot that listens for an performs karma operations (aka upvot
 - upvote a user: `<user>++`
 - downvote a user: `<user>--`
 - add/subtract multiple points at once:
-  - ​`<user>++` - 1 point
-  - ​`<user>+++` - 2 points
+  - `<user>++` - 1 point
+  - `<user>+++` - 2 points
   - and so on
 - add a message/reason for a karma operation:
-  - ​`<user>++ for <message>`; or
+  - `<user>++ for <message>`; or
   - `<user>++ <message>`
 - [motivate.im](http://motivate.im/) support:
   - `?m <user>`
@@ -56,6 +56,7 @@ Karmabot is a Slack bot that listens for an performs karma operations (aka upvot
 | `-db string`            | no        | path to sqlite database                  | `./db.sqlite3` |
 | `-leaderboardLimit int` | no        | the default amount of users to list in the leaderboard | `10`           |
 | `-maxpoints int`        | no        | the maximum amount of points that users can give/take at once | `6`            |
+| `-debug bool`        | no        | set debug mode | `false`            |
 
 **example:** `./karmabot -token xoxb-abcdefg`
 
