@@ -6,13 +6,13 @@ dependencies:
     override:
         - mkdir -p "$GOPATH/src/$IMPORT_PATH"
         - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
-        - go get -t -d -v "$GOPATH/src/$IMPORT_PATH/..."
+        - cd "$GOPATH/src/$IMPORT_PATH" && go get -t -d -v ./...
 test:
     pre:
         - go version
         - go env
     override:
-        - go vet ./...
+        - cd "$GOPATH/src/$IMPORT_PATH" && go vet ./...
     post:
         - GOOS=darwin  GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.darwin.amd64      $IMPORT_PATH
         - GOOS=freebsd GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.freebsd.amd64     $IMPORT_PATH
