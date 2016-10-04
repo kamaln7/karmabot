@@ -6,14 +6,16 @@ dependencies:
     override:
         - mkdir -p "$GOPATH/src/$IMPORT_PATH"
         - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
+        - go get -t -d -v "$GOPATH/src/$IMPORT_PATH/..."
 test:
     pre:
         - go version
         - go env
+    override:
         - go vet ./...
     post:
-        - GOOS=darwin  GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.darwin.amd64      $IMPORT
-        - GOOS=freebsd GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.freebsd.amd64     $IMPORT
-        - GOOS=linux   GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.linux.amd64       $IMPORT
-        - GOOS=windows GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.windows.amd64.exe $IMPORT
+        - GOOS=darwin  GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.darwin.amd64      $IMPORT_PATH
+        - GOOS=freebsd GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.freebsd.amd64     $IMPORT_PATH
+        - GOOS=linux   GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.linux.amd64       $IMPORT_PATH
+        - GOOS=windows GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.windows.amd64.exe $IMPORT_PATH
         - find $CIRCLE_ARTIFACTS -type f -exec shasum -a 256 {} \; | tee $CIRCLE_ARTIFACTS/sha256.txt
