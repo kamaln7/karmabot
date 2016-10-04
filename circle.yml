@@ -11,11 +11,9 @@ test:
         - go version
         - go env
         - go vet ./...
-    override:
-        - go test -v -race $IMPORT/...
     post:
-        - cd /go && GOOS=darwin  GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.darwin.amd64      $IMPORT
-        - cd /go && GOOS=freebsd GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.freebsd.amd64     $IMPORT
-        - cd /go && GOOS=linux   GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.linux.amd64       $IMPORT
-        - cd /go && GOOS=windows GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.windows.amd64.exe $IMPORT
+        - GOOS=darwin  GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.darwin.amd64      $IMPORT
+        - GOOS=freebsd GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.freebsd.amd64     $IMPORT
+        - GOOS=linux   GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.linux.amd64       $IMPORT
+        - GOOS=windows GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.windows.amd64.exe $IMPORT
         - find $CIRCLE_ARTIFACTS -type f -exec shasum -a 256 {} \; | tee $CIRCLE_ARTIFACTS/sha256.txt
