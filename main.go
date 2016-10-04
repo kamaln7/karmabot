@@ -55,7 +55,7 @@ Loop:
 		case msg := <-rtm.IncomingEvents:
 			switch ev := msg.Data.(type) {
 			case *slack.MessageEvent:
-				handleMessage(msg)
+				go handleMessage(msg)
 			case *slack.ConnectedEvent:
 				ll.Println("connected!")
 				ll.Println("infos:", ev.Info)
