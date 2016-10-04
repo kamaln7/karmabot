@@ -17,6 +17,7 @@ var (
 	motivateRegexp    = regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`)
 	karmaRegexp       = regexp.MustCompile(`^@?([^\s]+?)(?:\:\s)?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`)
 	leaderboardRegexp = regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`)
+	slackUserRegexp   = regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`)
 
 	maxPoints, leaderboardLimit int
 	bot                         *slack.Client
@@ -99,12 +100,16 @@ func givePoints(ev *slack.MessageEvent) {
 		return
 	}
 
-	userInfo, err := bot.GetUserInfo(ev.User)
+	from, err := getUserNameByID(ev.User)
 	if handleError(err, ev.Channel) {
 		return
 	}
-	from := userInfo.Name
-	to := strings.ToLower(match[1])
+	to, err := parseUser(match[1])
+	if handleError(err, ev.Channel) {
+		return
+	}
+	to = strings.ToLower(to)
+
 	points := min(len(match[2])-1, maxPoints)
 	if match[2][0] == '-' {
 		points *= -1
@@ -178,4 +183,21 @@ func handleError(err error, to string) bool {
 	}
 
 	return false
+}
+
+func parseUser(user string) (string, error) {
+	if match := slackUserRegexp.FindStringSubmatch(user); len(match) > 0 {
+		return getUserNameByID(match[1])
+	} else {
+		return user, nil
+	}
+}
+
+func getUserNameByID(id string) (string, error) {
+	userInfo, err := bot.GetUserInfo(id)
+	if err != nil {
+		return "", err
+	}
+
+	return userInfo.Name, nil
 }
