@@ -1,6 +1,6 @@
-# karmabot
+![karmabot logo](/logo.png)
 
-Karmabot is a Slack bot that listens for an performs karma operations (aka upvotes/downvotes).
+karmabot is a Slack bot that listens for and performs karma operations (aka upvotes/downvotes).
 
 ## Syntax
 
@@ -9,7 +9,7 @@ Karmabot is a Slack bot that listens for an performs karma operations (aka upvot
 - add/subtract multiple points at once:
   - `<user>++` - 1 point
   - `<user>+++` - 2 points
-  - and so on
+  - and so on, limited to `maxpoints` points (see the **Usage** section below)
 - add a message/reason for a karma operation:
   - `<user>++ for <message>`; or
   - `<user>++ <message>`
