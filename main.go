@@ -75,7 +75,7 @@ func main() {
 	go rtm.ManageConnection()
 
 	if hasWebUI {
-		webui.Init(ll, *flagTOTP, *flagListenAddr, *flagWebUIPath)
+		webui.Init(ll, *flagTOTP, *flagListenAddr, *flagWebUIPath, leaderboardLimit)
 		go webui.Listen()
 	}
 
