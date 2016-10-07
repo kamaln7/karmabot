@@ -1,14 +1,5 @@
 package karmabot
 
-// apparently you should do this for ints
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-
-	return b
-}
-
 var mungeMap = map[byte]rune{
 	'a': '\u00e4',
 	'b': '\u0411',
@@ -31,7 +22,7 @@ var mungeMap = map[byte]rune{
 	's': '\u0161',
 	't': '\u0163',
 	'u': '\u00fc',
-	'v': 'v',
+	'v': '\u03bd',
 	'w': '\u03c9',
 	'x': '\u03c7',
 	'y': '\u00ff',
