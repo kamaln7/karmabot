@@ -54,10 +54,10 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 | option                  | required? | description                              | default        |
 | ----------------------- | --------- | ---------------------------------------- | -------------- |
 | `-token string`         | **yes**   | slack RTM token                          |                |
+| `-debug bool`        | no        | set debug mode | `false`            |
 | `-db string`            | no        | path to sqlite database                  | `./db.sqlite3` |
 | `-leaderboardlimit int` | no        | the default amount of users to list in the leaderboard | `10`           |
 | `-maxpoints int`        | no        | the maximum amount of points that users can give/take at once | `6`            |
-| `-debug bool`        | no        | set debug mode | `false`            |
 
 **example:** `./karmabot -token xoxb-abcdefg`
 
