@@ -214,7 +214,7 @@ func printLeaderboard(ev *slack.MessageEvent) {
 	if hasWebUI {
 		token, err := webui.GetToken()
 		if err == nil {
-			text += fmt.Sprintf("%sleaderboard?token=%s&limit=%d\n", webUIURL, token, limit)
+			text += fmt.Sprintf("%sleaderboard/%d?token=%s\n", webUIURL, limit, token)
 		}
 	}
 
