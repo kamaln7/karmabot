@@ -1,4 +1,4 @@
-package karmabot
+package main
 
 import (
 	"flag"

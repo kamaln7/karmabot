@@ -1,4 +1,4 @@
-package karmabot
+package main
 
 var mungeMap = map[byte]rune{
 	'a': '\u00e4',

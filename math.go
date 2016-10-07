@@ -1,4 +1,4 @@
-package karmabot
+package main
 
 // apparently you should do this for ints
 func min(a, b int) int {
