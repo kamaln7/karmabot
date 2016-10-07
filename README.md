@@ -18,7 +18,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
   - `!m <user>`
 - leaderboard:
   - `<karma|karmabot> <leaderboard|top|highscores>`
-  - to list more than `leaderboardLimit` (see the **Usage** section below), you may append the number of users to list to the command above. e.g. `karmabot top 20`
+  - to list more than `leaderboardlimit` (see the **Usage** section below), you may append the number of users to list to the command above. e.g. `karmabot top 20`
 
 
 **note:** `<user>` does not have to be a Slack username. However, karmabot supports Slack autocompletion and so the following messages are parsed correctly:
@@ -55,7 +55,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 | ----------------------- | --------- | ---------------------------------------- | -------------- |
 | `-token string`         | **yes**   | slack RTM token                          |                |
 | `-db string`            | no        | path to sqlite database                  | `./db.sqlite3` |
-| `-leaderboardLimit int` | no        | the default amount of users to list in the leaderboard | `10`           |
+| `-leaderboardlimit int` | no        | the default amount of users to list in the leaderboard | `10`           |
 | `-maxpoints int`        | no        | the maximum amount of points that users can give/take at once | `6`            |
 | `-debug bool`        | no        | set debug mode | `false`            |
 

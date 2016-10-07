@@ -32,7 +32,7 @@ func main() {
 		flagToken            = flag.String("token", "", "slack RTM token")
 		flagDBPath           = flag.String("db", "./db.sqlite3", "path to sqlite database")
 		flagMaxPoints        = flag.Int("maxpoints", 6, "the maximum amount of points that users can give/take at once")
-		flagLeaderboardLimit = flag.Int("leaderboardLimit", 10, "the default amount of users to list in the leaderboard")
+		flagLeaderboardLimit = flag.Int("leaderboardlimit", 10, "the default amount of users to list in the leaderboard")
 		flagDebug            = flag.Bool("debug", false, "set debug mode")
 	)
 
