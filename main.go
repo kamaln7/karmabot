@@ -138,7 +138,7 @@ func givePoints(ev *slack.MessageEvent) {
 		return
 	}
 
-	text := fmt.Sprintf("%s == %d (")
+	text := fmt.Sprintf("%s == %d (", to, userPoints)
 
 	if points > 0 {
 		text += "+"
