@@ -23,10 +23,11 @@ var (
 	maxPoints, leaderboardLimit int
 	bot                         *slack.Client
 	rtm                         *slack.RTM
+	ll                          *log.Logger
 )
 
 func main() {
-	ll := log.New(os.Stdout, "", log.Lshortfile|log.LstdFlags)
+	ll = log.New(os.Stdout, "", log.Lshortfile|log.LstdFlags)
 
 	var (
 		flagToken            = flag.String("token", "", "slack RTM token")
@@ -53,7 +54,6 @@ func main() {
 	rtm = bot.NewRTM()
 	go rtm.ManageConnection()
 
-Loop:
 	for {
 		select {
 		case msg := <-rtm.IncomingEvents:
@@ -62,13 +62,14 @@ Loop:
 				go handleMessage(msg)
 			case *slack.ConnectedEvent:
 				ll.Println("connected!")
-				ll.Println("infos:", ev.Info)
-				ll.Println("connection counter:", ev.ConnectionCount)
+				if debug {
+					ll.Println("infos:", ev.Info)
+					ll.Println("connection counter:", ev.ConnectionCount)
+				}
 			case *slack.RTMError:
-				ll.Printf("RTM error: %s\n", ev.Error())
+				ll.Printf("Slack RTM error: %s\n", ev.Error())
 			case *slack.InvalidAuthEvent:
 				ll.Fatalln("invalid slack token")
-				break Loop
 			default:
 			}
 
@@ -181,6 +182,7 @@ func printLeaderboard(ev *slack.MessageEvent) {
 
 func handleError(err error, to string) bool {
 	if err != nil {
+		ll.Printf("Slack RTM error: %s\n", err.Error())
 		rtm.SendMessage(rtm.NewOutgoingMessage("error: "+err.Error(), to))
 		return true
 	}
