@@ -2,6 +2,7 @@ package karmabot
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -137,15 +138,15 @@ func givePoints(ev *slack.MessageEvent) {
 		return
 	}
 
-	givenPointsText := ""
-	if points > 0 {
-		givenPointsText = "+"
-	}
-	givenPointsText += strconv.Itoa(points)
+	text := fmt.Sprintf("%s == %d (")
 
-	text := to + " == " + strconv.Itoa(userPoints) + " (" + givenPointsText
+	if points > 0 {
+		text += "+"
+	}
+	text += strconv.Itoa(points)
+
 	if reason != "" {
-		text += " for " + reason
+		text += fmt.Sprintf(" for %s", reason)
 	}
 	text += ")"
 
@@ -166,7 +167,7 @@ func printLeaderboard(ev *slack.MessageEvent) {
 			return
 		}
 	}
-	text := "top " + strconv.Itoa(limit) + " leaderboard\n"
+	text := fmt.Sprintf("top %d leaderboard\n", limit)
 
 	leaderboard, err := database.GetLeaderboard(limit)
 	if handleError(err, ev.Channel) {
@@ -174,7 +175,7 @@ func printLeaderboard(ev *slack.MessageEvent) {
 	}
 
 	for _, user := range leaderboard {
-		text += munge(user.User) + " == " + strconv.Itoa(user.Points) + "\n"
+		text += fmt.Sprintf("%s == %d\n", munge(user.User), user.Points)
 	}
 
 	rtm.SendMessage(rtm.NewOutgoingMessage(text, ev.Channel))
