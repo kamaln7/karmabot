@@ -7,6 +7,8 @@ dependencies:
         - mkdir -p "$GOPATH/src/$IMPORT_PATH"
         - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
         - cd "$GOPATH/src/$IMPORT_PATH" && go get -t -d -v ./...
+    post:
+        - go get github.com/golang/lint/golint
 test:
     pre:
         - go version
