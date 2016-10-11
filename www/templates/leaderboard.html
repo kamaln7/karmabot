@@ -1,0 +1,26 @@
+{{ template "header.html" . }}
+
+			<section class="container" id="tables">
+                <h5 class="title">Top {{ .Data.Limit }} Leaderboard</h5>
+                <p>{{ .Data.TotalPoints }} karma points were given or taken in total so far.</p>
+				<div class="example">
+					<table>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Points</th>
+							</tr>
+						</thead>
+						<tbody>
+                            {{ range $_, $user := .Data.Leaderboard }}
+							<tr>
+                                <td>{{ $user.User | html }}</td>
+                                <td>{{ $user.Points }}</td>
+							</tr>
+                            {{ end }}
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+{{ template "footer.html" . }}

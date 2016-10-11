@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+	<head>
+        <title>karmabot</title>
+		<link rel="icon" href="/assets/images/favicon.png">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.1.0/milligram.min.css">
+		<link rel="stylesheet" href="/assets/stylesheets/main.css">
+	</head>
+	<body>
+
+		<main class="wrapper">
+
+			<nav class="navigation">
+				<section class="container">
+
+					<a class="navigation-title" href="/">
+						<h1 class="title">karmabot</h1>
+					</a>
+
+					<ul class="navigation-list float-right">
+						<li class="navigation-item">
+							<a class="navigation-link" href="#popover-support" data-popover>Leaderboard</a>
+							<div class="popover" id="popover-support">
+								<ul class="popover-list">
+                                    <li class="popover-item"><a class="popover-link" href="/leaderboard/{{ .Config.LeaderboardLimit }}">Top {{ .Config.LeaderboardLimit }}</a></li>
+                                    <li class="popover-item"><a class="popover-link" href="/leaderboard/20">Top 20</a></li>
+                                    <li class="popover-item"><a class="popover-link" href="/leaderboard/100">Top 100</a></li>
+                                    <li class="popover-item"><a class="popover-link" href="/leaderboard/500">Top 500</a></li>
+                                    <li class="popover-item"><a class="popover-link" href="/leaderboard/1000">Top 1000</a></li>
+								</ul>
+							</div>
+						</li>
+					</ul>
+				</section>
+			</nav>

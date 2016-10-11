@@ -3,6 +3,7 @@ package webui
 import (
 	"log"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -10,33 +11,38 @@ import (
 	//"github.com/gorilla/sessions"
 )
 
+// Config sets the different config options that are
+// needed to start the webserver
+type Config struct {
+	Logger                         *log.Logger
+	TOTPKey, ListenAddr, FilesPath string
+	LeaderboardLimit               int
+	Debug                          bool
+}
+
 var (
-	ll                             *log.Logger
-	totpKey, listenAddr, filesPath string
-	router                         *mux.Router
-	leaderboardLimit               int
+	config *Config
+	router *mux.Router
 )
 
 // Init initiates the web ui config
-func Init(logger *log.Logger, key, addr, path string, limit int) {
-	ll = logger
-	totpKey = key
-	listenAddr = addr
-	filesPath = path
-	leaderboardLimit = limit
+func Init(c *Config) {
+	config = c
 
-	if totpKey == "" {
-		newKey, err := totp.Generate(totp.GenerateOpts{
+	if config.TOTPKey == "" {
+		key, err := totp.Generate(totp.GenerateOpts{
 			Issuer:      "karmabot",
 			AccountName: "slack",
 		})
 
 		if err != nil {
-			ll.Fatalf("an error occurred while generating a TOTP key: %s\n", err.Error())
+			config.Logger.Fatalf("an error occurred while generating a TOTP key: %s\n", err.Error())
 		} else {
-			ll.Fatalf("please use the following TOTP key (`karmabot -totp <key>`): %s\n", newKey.Secret())
+			config.Logger.Fatalf("please use the following TOTP key (`karmabot -totp <key>`): %s\n", key.Secret())
 		}
 	}
+
+	setupTemplates()
 
 	router = mux.NewRouter()
 	setupRoutes(router)
@@ -46,15 +52,19 @@ func setupRoutes(r *mux.Router) {
 	r.HandleFunc("/", HomeHandler)
 	r.HandleFunc("/leaderboard", LeaderboardHandler)
 	r.HandleFunc(`/leaderboard/{limit:\d+}`, LeaderboardHandler)
+
+	assetsPath := path.Join(config.FilesPath, "assets")
+	assetsHandler := http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsPath)))
+	r.PathPrefix("/assets").Handler(assetsHandler)
 }
 
 // GetToken generates and returns a TOTP token
 func GetToken() (string, error) {
-	return totp.GenerateCode(totpKey, time.Now())
+	return totp.GenerateCode(config.TOTPKey, time.Now())
 }
 
 // Listen starts the web ui
 func Listen() {
-	ll.Printf("serving webui on %s\n", listenAddr)
-	ll.Fatal(http.ListenAndServe(listenAddr, router))
+	config.Logger.Printf("serving webui on %s\n", config.ListenAddr)
+	config.Logger.Fatal(http.ListenAndServe(config.ListenAddr, router))
 }

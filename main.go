@@ -75,7 +75,16 @@ func main() {
 	go rtm.ManageConnection()
 
 	if hasWebUI {
-		webui.Init(ll, *flagTOTP, *flagListenAddr, *flagWebUIPath, leaderboardLimit)
+		webUIConfig := &webui.Config{
+			Logger:           ll,
+			TOTPKey:          *flagTOTP,
+			ListenAddr:       *flagListenAddr,
+			FilesPath:        *flagWebUIPath,
+			LeaderboardLimit: leaderboardLimit,
+			Debug:            debug,
+		}
+
+		webui.Init(webUIConfig)
 		go webui.Listen()
 	}
 
