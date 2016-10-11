@@ -121,3 +121,17 @@ func GetLeaderboard(limit int) (Leaderboard, error) {
 
 	return leaderboard, nil
 }
+
+// GetTotalPoints returns the amount of points given or taken
+// for all users
+func GetTotalPoints() (int, error) {
+	var res int
+
+	err := db.QueryRow("select sum(abs(`points`)) from karma").Scan(&res)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return res, nil
+}
