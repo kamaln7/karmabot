@@ -9,6 +9,7 @@ import (
 	"github.com/kamaln7/karmabot/database"
 )
 
+// HomeHandler handles / URLs
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/leaderboard", 302)
 }
@@ -18,6 +19,7 @@ type leaderboardPageData struct {
 	Leaderboard        database.Leaderboard
 }
 
+// LeaderboardHandler handles /leaderboard URLs
 func LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	var (
 		limit int

@@ -46,12 +46,13 @@ func Init(c *Config) {
 
 	router = mux.NewRouter()
 	setupRoutes(router)
+	go expireClients()
 }
 
 func setupRoutes(r *mux.Router) {
-	r.HandleFunc("/", HomeHandler)
-	r.HandleFunc("/leaderboard", LeaderboardHandler)
-	r.HandleFunc(`/leaderboard/{limit:\d+}`, LeaderboardHandler)
+	r.Handle("/", mustAuth(HomeHandler))
+	r.Handle("/leaderboard", mustAuth(LeaderboardHandler))
+	r.Handle(`/leaderboard/{limit:\d+}`, mustAuth(LeaderboardHandler))
 
 	assetsPath := path.Join(config.FilesPath, "assets")
 	assetsHandler := http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsPath)))
