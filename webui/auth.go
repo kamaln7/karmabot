@@ -57,6 +57,7 @@ func (h *authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		cookie = &http.Cookie{
 			Name:  "session",
 			Value: uuid.NewV4().String(),
+			Path:  "/",
 		}
 
 		clientsMutex.Lock()
