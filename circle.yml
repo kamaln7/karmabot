@@ -2,9 +2,10 @@ machine:
     environment:
         PROJECT: $CIRCLE_PROJECT_REPONAME
         IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+        ROOTDIR: "/home/ubuntu/.go_workspace/src/$IMPORT_PATH"
 dependencies:
     override:
-        - cd "$GOPATH/src/$IMPORT_PATH" && go get -t -d -v ./...
+        - cd $ROOTDIR && go get -t -d -v ./...
     post:
         - go get github.com/golang/lint/golint
 test:
@@ -12,8 +13,8 @@ test:
         - go version
         - go env
     override:
-        - cd "$GOPATH/src/$IMPORT_PATH" && go vet ./...
-        - cd "$GOPATH/src/$IMPORT_PATH" && golint ./...
+        - cd $ROOTDIR && go vet ./...
+        - cd $ROOTDIR && golint ./...
     post:
         - GOOS=linux   GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.linux.amd64       $IMPORT_PATH
 #        - GOOS=darwin  GOARCH=amd64 go build -o $CIRCLE_ARTIFACTS/$PROJECT.darwin.amd64      $IMPORT_PATH
