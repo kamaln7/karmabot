@@ -12,15 +12,21 @@ import (
 	"github.com/nlopes/slack"
 
 	"github.com/kamaln7/karmabot/database"
+	"github.com/kamaln7/karmabot/webui"
 )
 
 var (
-	motivateRegexp    = regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`)
-	karmaRegexp       = regexp.MustCompile(`^@?([^\s]+?)(?:\:\s)?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`)
-	leaderboardRegexp = regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`)
-	slackUserRegexp   = regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`)
+	regexps = map[string]*regexp.Regexp{
+		"motivate":    regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`),
+		"karma":       regexp.MustCompile(`^@?([^\s]+?)(?:\:\s)?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
+		"leaderboard": regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
+		"url":         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
+		"slackUser":   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
+	}
 
 	debug                       bool
+	hasWebUI                    bool
+	webUIURL                    string
 	maxPoints, leaderboardLimit int
 	bot                         *slack.Client
 	rtm                         *slack.RTM
@@ -36,12 +42,25 @@ func main() {
 		flagMaxPoints        = flag.Int("maxpoints", 6, "the maximum amount of points that users can give/take at once")
 		flagLeaderboardLimit = flag.Int("leaderboardlimit", 10, "the default amount of users to list in the leaderboard")
 		flagDebug            = flag.Bool("debug", false, "set debug mode")
+		flagTOTP             = flag.String("totp", "", "totp key")
+		flagWebUIPath        = flag.String("webuipath", "", "path to web UI files")
+		flagListenAddr       = flag.String("listenaddr", "", "address to listen and serve the web ui on")
+		flagWebUIURL         = flag.String("webuiurl", "", "url address for accessing the web ui")
 	)
 
 	flag.Parse()
 	maxPoints = *flagMaxPoints
 	leaderboardLimit = *flagLeaderboardLimit
 	debug = *flagDebug
+	hasWebUI = *flagWebUIPath != "" && *flagListenAddr != ""
+	if hasWebUI {
+		if *flagWebUIURL != "" {
+			webUIURL = *flagWebUIURL
+		} else {
+			webUIURL = fmt.Sprintf("http://%s/", *flagListenAddr)
+		}
+	}
+
 	if *flagToken == "" {
 		ll.Fatalln("please pass the slack RTM token using the -token option")
 	}
@@ -54,6 +73,20 @@ func main() {
 
 	rtm = bot.NewRTM()
 	go rtm.ManageConnection()
+
+	if hasWebUI {
+		webUIConfig := &webui.Config{
+			Logger:           ll,
+			TOTPKey:          *flagTOTP,
+			ListenAddr:       *flagListenAddr,
+			FilesPath:        *flagWebUIPath,
+			LeaderboardLimit: leaderboardLimit,
+			Debug:            debug,
+		}
+
+		webui.Init(webUIConfig)
+		go webui.Listen()
+	}
 
 	for {
 		select {
@@ -86,21 +119,38 @@ func handleMessage(msg slack.RTMEvent) {
 	}
 
 	// convert motivates into karmabot syntax
-	if match := motivateRegexp.FindStringSubmatch(ev.Text); len(match) > 0 {
+	if match := regexps["motivate"].FindStringSubmatch(ev.Text); len(match) > 0 {
 		ev.Text = match[1] + "++ for doing good work"
 	}
 
-	if karmaRegexp.MatchString(ev.Text) {
-		givePoints(ev)
-	}
+	switch {
+	case regexps["url"].MatchString(ev.Text):
+		printURL(ev)
 
-	if leaderboardRegexp.MatchString(ev.Text) {
+	case regexps["karma"].MatchString(ev.Text):
+		givePoints(ev)
+
+	case regexps["leaderboard"].MatchString(ev.Text):
 		printLeaderboard(ev)
 	}
 }
 
+func printURL(ev *slack.MessageEvent) {
+	if !hasWebUI {
+		rtm.SendMessage(rtm.NewOutgoingMessage("webui not enabled. please pass the `-webuipath`, `-webuiurl`, and `-listenaddr` options in order to enable the web ui", ev.Channel))
+		return
+	}
+
+	token, err := webui.GetToken()
+	if handleError(err, ev.Channel) {
+		return
+	}
+
+	rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("%s?token=%s", webUIURL, token), ev.Channel))
+}
+
 func givePoints(ev *slack.MessageEvent) {
-	match := karmaRegexp.FindStringSubmatch(ev.Text)
+	match := regexps["karma"].FindStringSubmatch(ev.Text)
 	if len(match) == 0 {
 		return
 	}
@@ -154,7 +204,7 @@ func givePoints(ev *slack.MessageEvent) {
 }
 
 func printLeaderboard(ev *slack.MessageEvent) {
-	match := leaderboardRegexp.FindStringSubmatch(ev.Text)
+	match := regexps["leaderboard"].FindStringSubmatch(ev.Text)
 	if len(match) == 0 {
 		return
 	}
@@ -167,15 +217,23 @@ func printLeaderboard(ev *slack.MessageEvent) {
 			return
 		}
 	}
-	text := fmt.Sprintf("top %d leaderboard\n", limit)
+
+	text := fmt.Sprintf("*top %d leaderboard*\n", limit)
+
+	if hasWebUI {
+		token, err := webui.GetToken()
+		if err == nil {
+			text += fmt.Sprintf("%sleaderboard/%d?token=%s\n", webUIURL, limit, token)
+		}
+	}
 
 	leaderboard, err := database.GetLeaderboard(limit)
 	if handleError(err, ev.Channel) {
 		return
 	}
 
-	for _, user := range leaderboard {
-		text += fmt.Sprintf("%s == %d\n", munge(user.User), user.Points)
+	for i, user := range leaderboard {
+		text += fmt.Sprintf("%d. %s == %d\n", i+1, munge(user.User), user.Points)
 	}
 
 	rtm.SendMessage(rtm.NewOutgoingMessage(text, ev.Channel))
@@ -192,7 +250,7 @@ func handleError(err error, to string) bool {
 }
 
 func parseUser(user string) (string, error) {
-	if match := slackUserRegexp.FindStringSubmatch(user); len(match) > 0 {
+	if match := regexps["slackUser"].FindStringSubmatch(user); len(match) > 0 {
 		return getUserNameByID(match[1])
 	}
 
