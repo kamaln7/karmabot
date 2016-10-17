@@ -16,12 +16,14 @@ import (
 )
 
 var (
-	regexps = map[string]*regexp.Regexp{
-		"motivate":    regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`),
-		"karma":       regexp.MustCompile(`^@?([^\s]+?)(?:\:\s)?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
-		"leaderboard": regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
-		"url":         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
-		"slackUser":   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
+	regexps = struct {
+		Motivate, Karma, Leaderboard, URL, SlackUser *regexp.Regexp
+	}{
+		Motivate:    regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`),
+		Karma:       regexp.MustCompile(`^@?([^\s]+?)(?:\:\s)?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
+		Leaderboard: regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
+		URL:         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
+		SlackUser:   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
 	}
 
 	debug                       bool
@@ -119,18 +121,18 @@ func handleMessage(msg slack.RTMEvent) {
 	}
 
 	// convert motivates into karmabot syntax
-	if match := regexps["motivate"].FindStringSubmatch(ev.Text); len(match) > 0 {
+	if match := regexps.Motivate.FindStringSubmatch(ev.Text); len(match) > 0 {
 		ev.Text = match[1] + "++ for doing good work"
 	}
 
 	switch {
-	case regexps["url"].MatchString(ev.Text):
+	case regexps.URL.MatchString(ev.Text):
 		printURL(ev)
 
-	case regexps["karma"].MatchString(ev.Text):
+	case regexps.Karma.MatchString(ev.Text):
 		givePoints(ev)
 
-	case regexps["leaderboard"].MatchString(ev.Text):
+	case regexps.Leaderboard.MatchString(ev.Text):
 		printLeaderboard(ev)
 	}
 }
@@ -150,7 +152,7 @@ func printURL(ev *slack.MessageEvent) {
 }
 
 func givePoints(ev *slack.MessageEvent) {
-	match := regexps["karma"].FindStringSubmatch(ev.Text)
+	match := regexps.Karma.FindStringSubmatch(ev.Text)
 	if len(match) == 0 {
 		return
 	}
@@ -204,7 +206,7 @@ func givePoints(ev *slack.MessageEvent) {
 }
 
 func printLeaderboard(ev *slack.MessageEvent) {
-	match := regexps["leaderboard"].FindStringSubmatch(ev.Text)
+	match := regexps.Leaderboard.FindStringSubmatch(ev.Text)
 	if len(match) == 0 {
 		return
 	}
@@ -250,7 +252,7 @@ func handleError(err error, to string) bool {
 }
 
 func parseUser(user string) (string, error) {
-	if match := regexps["slackUser"].FindStringSubmatch(user); len(match) > 0 {
+	if match := regexps.SlackUser.FindStringSubmatch(user); len(match) > 0 {
 		return getUserNameByID(match[1])
 	}
 
