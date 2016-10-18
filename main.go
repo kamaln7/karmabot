@@ -28,6 +28,7 @@ var (
 
 	debug                       bool
 	hasWebUI                    bool
+	hasMotivate                 bool
 	webUIURL                    string
 	maxPoints, leaderboardLimit int
 	bot                         *slack.Client
@@ -48,6 +49,7 @@ func main() {
 		flagWebUIPath        = flag.String("webuipath", "", "path to web UI files")
 		flagListenAddr       = flag.String("listenaddr", "", "address to listen and serve the web ui on")
 		flagWebUIURL         = flag.String("webuiurl", "", "url address for accessing the web ui")
+		flagMotivate         = flag.Bool("motivate", true, "toggle motivate.im support")
 	)
 
 	flag.Parse()
@@ -55,6 +57,7 @@ func main() {
 	leaderboardLimit = *flagLeaderboardLimit
 	debug = *flagDebug
 	hasWebUI = *flagWebUIPath != "" && *flagListenAddr != ""
+	hasMotivate = *flagMotivate
 	if hasWebUI {
 		if *flagWebUIURL != "" {
 			webUIURL = *flagWebUIURL
@@ -121,8 +124,10 @@ func handleMessage(msg slack.RTMEvent) {
 	}
 
 	// convert motivates into karmabot syntax
-	if match := regexps.Motivate.FindStringSubmatch(ev.Text); len(match) > 0 {
-		ev.Text = match[1] + "++ for doing good work"
+	if hasMotivate {
+		if match := regexps.Motivate.FindStringSubmatch(ev.Text); len(match) > 0 {
+			ev.Text = match[1] + "++ for doing good work"
+		}
 	}
 
 	switch {
