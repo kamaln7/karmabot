@@ -13,6 +13,7 @@ type authMiddleware struct {
 	handler http.Handler
 }
 
+// Client is an authenticated web ui session
 type Client struct {
 	UUID  string
 	Added time.Time
