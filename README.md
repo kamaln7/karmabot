@@ -1,4 +1,6 @@
-![karmabot logo](/logo.png)
+![karmabot logo](/logo.png)  
+
+[![Build Status](https://semaphoreci.com/api/v1/kamaln7/karmabot/branches/master/badge.svg)](https://semaphoreci.com/kamaln7/karmabot)
 
 karmabot is a Slack bot that listens for and performs karma operations (aka upvotes/downvotes).
 
