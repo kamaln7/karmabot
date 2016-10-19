@@ -38,6 +38,7 @@ var (
 
 func main() {
 	ll = log.New(os.Stdout, "", log.Lshortfile|log.LstdFlags)
+	ll.Printf("karmabot v%s\n", VERSION)
 
 	var (
 		flagToken            = flag.String("token", "", "slack RTM token")
