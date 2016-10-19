@@ -20,7 +20,7 @@ var (
 		Motivate, Karma, Leaderboard, URL, SlackUser *regexp.Regexp
 	}{
 		Motivate:    regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`),
-		Karma:       regexp.MustCompile(`^@?([^\s]+?)(?:\:\s)?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
+		Karma:       regexp.MustCompile(`(?:^|\s+)@?([^\s]+?)\:?\s?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
 		Leaderboard: regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
 		URL:         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
 		SlackUser:   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
