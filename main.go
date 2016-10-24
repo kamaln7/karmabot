@@ -20,7 +20,8 @@ var (
 		Motivate, Karma, Leaderboard, URL, SlackUser *regexp.Regexp
 	}{
 		Motivate:    regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`),
-		Karma:       regexp.MustCompile(`(?:^|\s+)@?([^\s]+?)\:?\s?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
+		KarmaOne:    regexp.MustCompile(`^@?([^\s]+?)\:?\s?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
+		KarmaTwo:    regexp.MustCompile(`\s+@?([^\s]+?)(?:\:\s)?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
 		Leaderboard: regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
 		URL:         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
 		SlackUser:   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
@@ -135,8 +136,12 @@ func handleMessage(msg slack.RTMEvent) {
 	case regexps.URL.MatchString(ev.Text):
 		printURL(ev)
 
-	case regexps.Karma.MatchString(ev.Text):
-		givePoints(ev)
+	case regexps.KarmaOne.MatchString(ev.Text):
+		match := regexps.KarmaOne.FindStringSubmatch(ev.Text)
+		givePoints(ev, match)
+	case regexps.KarmaTwo.MatchString(ev.Text):
+		match := regexps.KarmaTwo.FindStringSubmatch(ev.Text)
+		givePoints(ev, match)
 
 	case regexps.Leaderboard.MatchString(ev.Text):
 		printLeaderboard(ev)
@@ -157,8 +162,7 @@ func printURL(ev *slack.MessageEvent) {
 	rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("%s?token=%s", webUIURL, token), ev.Channel))
 }
 
-func givePoints(ev *slack.MessageEvent) {
-	match := regexps.Karma.FindStringSubmatch(ev.Text)
+func givePoints(ev *slack.MessageEvent, match []string) {
 	if len(match) == 0 {
 		return
 	}
