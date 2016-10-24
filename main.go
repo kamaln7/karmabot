@@ -17,7 +17,7 @@ import (
 
 var (
 	regexps = struct {
-		Motivate, Karma, Leaderboard, URL, SlackUser *regexp.Regexp
+		Motivate, KarmaOne, KarmaTwo, Leaderboard, URL, SlackUser *regexp.Regexp
 	}{
 		Motivate:    regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`),
 		KarmaOne:    regexp.MustCompile(`^@?([^\s]+?)\:?\s?([\+]{2,}|[\-]{2,})((?: for)? (.*))?$`),
