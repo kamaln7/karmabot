@@ -1,4 +1,4 @@
-package main
+package karmabot
 
 import (
 	"flag"
@@ -8,11 +8,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/nlopes/slack"
+	"sync"
 
 	"github.com/kamaln7/karmabot/database"
-	"github.com/kamaln7/karmabot/webui"
+	"github.com/kamaln7/karmabot/math"
+	"github.com/kamaln7/karmabot/ui"
+
+	"github.com/nlopes/slack"
 )
 
 var (
@@ -25,107 +27,84 @@ var (
 		URL:         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
 		SlackUser:   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
 	}
-
-	debug                       bool
-	hasWebUI                    bool
-	hasMotivate                 bool
-	webUIURL                    string
-	maxPoints, leaderboardLimit int
-	bot                         *slack.Client
-	rtm                         *slack.RTM
-	ll                          *log.Logger
 )
 
-func main() {
-	ll = log.New(os.Stdout, "", log.Lshortfile|log.LstdFlags)
-	ll.Printf("karmabot v%s\n", VERSION)
+type Slack struct {
+	Bot *slack.Client
+	RTM *slack.RTM
+}
 
-	var (
-		flagToken            = flag.String("token", "", "slack RTM token")
-		flagDBPath           = flag.String("db", "./db.sqlite3", "path to sqlite database")
-		flagMaxPoints        = flag.Int("maxpoints", 6, "the maximum amount of points that users can give/take at once")
-		flagLeaderboardLimit = flag.Int("leaderboardlimit", 10, "the default amount of users to list in the leaderboard")
-		flagDebug            = flag.Bool("debug", false, "set debug mode")
-		flagTOTP             = flag.String("totp", "", "totp key")
-		flagWebUIPath        = flag.String("webuipath", "", "path to web UI files")
-		flagListenAddr       = flag.String("listenaddr", "", "address to listen and serve the web ui on")
-		flagWebUIURL         = flag.String("webuiurl", "", "url address for accessing the web ui")
-		flagMotivate         = flag.Bool("motivate", true, "toggle motivate.im support")
-	)
+type Config struct {
+	Slack                       *Slack
+	Debug                       bool
+	MaxPoints, LeaderboardLimit int
+	Log                         *log.Logger
+	UI                          *ui.Provider
+	DB                          *database.DB
+}
 
-	flag.Parse()
-	maxPoints = *flagMaxPoints
-	leaderboardLimit = *flagLeaderboardLimit
-	debug = *flagDebug
-	hasWebUI = *flagWebUIPath != "" && *flagListenAddr != ""
-	hasMotivate = *flagMotivate
-	if hasWebUI {
-		if *flagWebUIURL != "" {
-			webUIURL = *flagWebUIURL
-		} else {
-			webUIURL = fmt.Sprintf("http://%s/", *flagListenAddr)
-		}
+type Bot struct {
+	Config *Config
+}
+
+func New(config *Config) {
+	return &Bot{
+		Config: config,
 	}
+}
 
-	if *flagToken == "" {
-		ll.Fatalln("please pass the slack RTM token using the -token option")
-	}
-
-	database.Init(ll, *flagDBPath)
-
-	bot = slack.New(*flagToken)
-	slack.SetLogger(ll)
-	bot.SetDebug(debug)
-
-	rtm = bot.NewRTM()
-	go rtm.ManageConnection()
-
-	if hasWebUI {
-		webUIConfig := &webui.Config{
-			Logger:           ll,
-			TOTPKey:          *flagTOTP,
-			ListenAddr:       *flagListenAddr,
-			FilesPath:        *flagWebUIPath,
-			LeaderboardLimit: leaderboardLimit,
-			Debug:            debug,
-		}
-
-		webui.Init(webUIConfig)
-		go webui.Listen()
-	}
-
+func (b *Bot) Listen() {
 	for {
 		select {
-		case msg := <-rtm.IncomingEvents:
+		case msg := <-b.Slack.RTM.IncomingEvents:
 			switch ev := msg.Data.(type) {
 			case *slack.MessageEvent:
-				go handleMessage(msg)
+				go b.handleMessageEvent(msg.Data.(*slack.MessageEvent))
 			case *slack.ConnectedEvent:
-				ll.Println("connected!")
-				if debug {
-					ll.Println("infos:", ev.Info)
-					ll.Println("connection counter:", ev.ConnectionCount)
+				ll.Info("connected to slack")
+
+				if b.Config.Debug {
+					ll.KV("info", ev.Info).Info("got slack info")
+					ll.KV("connections", ev.ConnectionCount).Info("got connection count")
 				}
 			case *slack.RTMError:
-				ll.Printf("Slack RTM error: %s\n", ev.Error())
+				ll.Err(ev).Error("slack rtm error")
 			case *slack.InvalidAuthEvent:
-				ll.Fatalln("invalid slack token")
+				ll.Fatal("invalid slack token")
 			default:
 			}
-
 		}
 	}
 }
 
-func handleMessage(msg slack.RTMEvent) {
-	ev := msg.Data.(*slack.MessageEvent)
+func (b *Bot) SendMessage(message, channel string) {
+	return rtm.SendMessage(rtm.NewOutgoingMessage(message, channel))
+}
 
+func (b *Bot) handleError(err error, channel string) {
+	if err == nil {
+		return false
+	}
+
+	ll.Err(err).Error("error")
+	var message string
+	if b.Config.Debug {
+		message = err.Error()
+	} else {
+		message = "an error has occurred."
+	}
+
+	b.SendMessage(message, channel)
+	return true
+}
+
+func (b *Bot) handleMessageEvent(ev *slack.MessageEvent) {
 	if ev.Type != "message" {
 		return
 	}
 
 	// convert motivates into karmabot syntax
-	if hasMotivate {
+	if b.Config.Motivate {
 		if match := regexps.Motivate.FindStringSubmatch(ev.Text); len(match) > 0 {
 			ev.Text = match[1] + "++ for doing good work"
 		}
@@ -133,53 +112,53 @@ func handleMessage(msg slack.RTMEvent) {
 
 	switch {
 	case regexps.URL.MatchString(ev.Text):
-		printURL(ev)
+		b.printURL(ev)
 
 	case regexps.Karma.MatchString(ev.Text):
-		givePoints(ev)
+		b.givePoints(ev)
 
 	case regexps.Leaderboard.MatchString(ev.Text):
-		printLeaderboard(ev)
+		b.printLeaderboard(ev)
 	}
 }
 
-func printURL(ev *slack.MessageEvent) {
+func (b *Bot) printURL(ev *slack.MessageEvent) {
 	if !hasWebUI {
 		rtm.SendMessage(rtm.NewOutgoingMessage("webui not enabled. please pass the `-webuipath`, `-webuiurl`, and `-listenaddr` options in order to enable the web ui", ev.Channel))
 		return
 	}
 
-	token, err := webui.GetToken()
-	if handleError(err, ev.Channel) {
+	URL, err := b.UI.GetURL("/")
+	if b.handleError(err, ev.Channel) {
 		return
 	}
 
-	rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("%s?token=%s", webUIURL, token), ev.Channel))
+	b.SendMessage(URL, ev.Channel)
 }
 
-func givePoints(ev *slack.MessageEvent) {
+func (b *Bot) givePoints(ev *slack.MessageEvent) {
 	match := regexps.Karma.FindStringSubmatch(ev.Text)
 	if len(match) == 0 {
 		return
 	}
 
-	from, err := getUserNameByID(ev.User)
+	from, err := b.getUserNameByID(ev.User)
 	if handleError(err, ev.Channel) {
 		return
 	}
-	to, err := parseUser(match[1])
+	to, err := b.parseUser(match[1])
 	if handleError(err, ev.Channel) {
 		return
 	}
 	to = strings.ToLower(to)
 
-	points := min(len(match[2])-1, maxPoints)
+	points := math.Min(len(match[2])-1, maxPoints)
 	if match[2][0] == '-' {
 		points *= -1
 	}
 	reason := match[4]
 
-	record := database.Points{
+	record := &database.Points{
 		From:   from,
 		To:     to,
 		Points: points,
@@ -208,7 +187,7 @@ func givePoints(ev *slack.MessageEvent) {
 	}
 	text += ")"
 
-	rtm.SendMessage(rtm.NewOutgoingMessage(text, ev.Channel))
+	b.SendMessage(text, ev.Channel)
 }
 
 func printLeaderboard(ev *slack.MessageEvent) {
@@ -245,16 +224,6 @@ func printLeaderboard(ev *slack.MessageEvent) {
 	}
 
 	rtm.SendMessage(rtm.NewOutgoingMessage(text, ev.Channel))
-}
-
-func handleError(err error, to string) bool {
-	if err != nil {
-		ll.Printf("Slack RTM error: %s\n", err.Error())
-		rtm.SendMessage(rtm.NewOutgoingMessage("error: "+err.Error(), to))
-		return true
-	}
-
-	return false
 }
 
 func parseUser(user string) (string, error) {

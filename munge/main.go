@@ -1,6 +1,6 @@
-package main
+package munge
 
-var mungeMap = map[byte]rune{
+const charMap = map[byte]rune{
 	'a': '\u00e4',
 	'b': '\u0411',
 	'c': '\u010b',
@@ -55,7 +55,7 @@ var mungeMap = map[byte]rune{
 	'Z': '\u017b',
 }
 
-func munge(str string) string {
+func Munge(str string) string {
 	if len(str) < 1 {
 		return str
 	}
