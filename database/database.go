@@ -102,14 +102,14 @@ func (db *DB) InsertPoints(points *Points) error {
 func (db *DB) GetUser(name string) (*User, error) {
 	stmt, err := db.SQL.Prepare("select sum(`points`) as points from karma where `to` = ?")
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	defer stmt.Close()
 
 	user := &User{
 		Name: name,
 	}
-	err = stmt.QueryRow(user).Scan(&user.Points)
+	err = stmt.QueryRow(user.Name).Scan(&user.Points)
 	if err != nil {
 		return nil, err
 	}

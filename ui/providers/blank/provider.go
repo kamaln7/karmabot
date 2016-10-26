@@ -11,5 +11,5 @@ func (p *Provider) Listen() error {
 }
 
 func (p *Provider) GetURL(URI string) (string, error) {
-	return "", errors.New("webui disabled")
+	return "", nil
 }

@@ -1,6 +1,6 @@
 package munge
 
-const charMap = map[byte]rune{
+var charMap = map[byte]rune{
 	'a': '\u00e4',
 	'b': '\u0411',
 	'c': '\u010b',
@@ -62,7 +62,7 @@ func Munge(str string) string {
 
 	first := str[0]
 	out := []rune(str)
-	if munged, ok := mungeMap[first]; ok {
+	if munged, ok := charMap[first]; ok {
 		out[0] = munged
 	}
 
