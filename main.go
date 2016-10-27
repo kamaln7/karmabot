@@ -187,7 +187,7 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 	if points > 0 {
 		text += "+"
 	}
-	text += strconv.Itoa(points)
+	text = fmt.Sprintf("%s%d", text, points)
 
 	if reason != "" {
 		text += fmt.Sprintf(" for %s", reason)
@@ -219,7 +219,7 @@ func (b *Bot) printLeaderboard(ev *slack.MessageEvent) {
 		return
 	}
 	if url != "" {
-		text += url
+		text = fmt.Sprintf("%s%s\n", text, url)
 	}
 
 	leaderboard, err := b.Config.DB.GetLeaderboard(limit)

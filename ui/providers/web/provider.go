@@ -3,6 +3,8 @@ package web
 import (
 	"fmt"
 
+	"github.com/kamaln7/karmabot/database"
+
 	"github.com/aybabtme/log"
 	"github.com/pquerna/otp/totp"
 )
@@ -12,6 +14,7 @@ type Config struct {
 	LeaderboardLimit                 int
 	Log                              *log.Log
 	Debug                            bool
+	DB                               *database.DB
 }
 
 type Provider struct {

@@ -22,6 +22,8 @@ func (u *UI) setupRoutes() {
 
 	// routes
 	r.HandleFunc("/", h.MustAuth(h.Home)).Methods("GET")
+	r.HandleFunc("/leaderboard", h.MustAuth(h.Leaderboard)).Methods("GET")
+	r.HandleFunc(`/leaderboard/{limit:\d+}`, h.MustAuth(h.Leaderboard)).Methods("GET")
 
 	// custom handlers
 	r.NotFoundHandler = http.HandlerFunc(h.NotFound)

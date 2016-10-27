@@ -40,7 +40,7 @@ func (u *UI) setupTemplates() {
 }
 
 func (u *UI) renderTemplate(w http.ResponseWriter, tmpl string, data *templateData) {
-	err := u.templates.ExecuteTemplate(w, tmpl, data.Data)
+	err := u.templates.ExecuteTemplate(w, tmpl, data)
 
 	if err != nil {
 		u.Config.Log.Err(err).KV("template", tmpl).Error("could not render template")

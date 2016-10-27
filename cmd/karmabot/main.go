@@ -41,7 +41,7 @@ func main() {
 
 	// database
 
-	DB, err := database.New(&database.Config{
+	db, err := database.New(&database.Config{
 		Path: *flags.DB,
 	})
 
@@ -79,6 +79,7 @@ func main() {
 			LeaderboardLimit: *flags.LeaderboardLimit,
 			Log:              ll.KV("provider", "webui"),
 			Debug:            *flags.Debug,
+			DB:               db,
 		})
 
 		if err != nil {
@@ -96,7 +97,7 @@ func main() {
 		MaxPoints:        *flags.MaxPoints,
 		LeaderboardLimit: *flags.LeaderboardLimit,
 		Log:              ll,
-		DB:               DB,
+		DB:               db,
 	})
 
 	bot.Listen()

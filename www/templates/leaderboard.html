@@ -14,7 +14,7 @@
 						<tbody>
                             {{ range $_, $user := .Data.Leaderboard }}
 							<tr>
-                                <td>{{ $user.User | html }}</td>
+                                <td>{{ $user.Name | html }}</td>
                                 <td>{{ $user.Points }}</td>
 							</tr>
                             {{ end }}
