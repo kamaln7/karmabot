@@ -36,7 +36,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 ### Build from Source
 
 1. clone the repo:
-    1. `git clone -b v0.1.0 https://github.com/kamaln7/karmabot.git`
+    1. `git clone -b v1.0.0 https://github.com/kamaln7/karmabot.git`
 2. run `go get` and then `go build` inside the repo's root
     1. `cd karmabot`
     2. `go get`
@@ -56,15 +56,17 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 | option                  | required? | description                              | default        |
 | ----------------------- | --------- | ---------------------------------------- | -------------- |
 | `-token string`         | **yes**   | slack RTM token                          |                |
-| `-debug bool`           | no        | set debug mode                           | `false`        |
+| `-debug=bool`           | no        | set debug mode                           | `false`        |
 | `-db string`            | no        | path to sqlite database                  | `./db.sqlite3` |
 | `-leaderboardlimit int` | no        | the default amount of users to list in the leaderboard | `10`           |
 | `-maxpoints int`        | no        | the maximum amount of points that users can give/take at once | `6`            |
-| `-motivate bool`        | no        | toggle [motivate.im](http://motivate.im/) support | `true`         |
+| `-motivate=bool`        | no        | toggle [motivate.im](http://motivate.im/) support | `true`         |
 
 In addition, see the table below for the options related to the web UI.
 
 **example:** `./karmabot -token xoxb-abcdefg`
+
+I recommend passing karmabot's logs through [humanlog](https://github.com/aybabtme/humanlog). humanlog will format and color the JSON output as nice easy-to-read text.
 
 ## Web UI
 
@@ -75,21 +77,21 @@ karmabot includes an optional web UI. The web UI uses TOTP tokens for authentica
 #### Requisites
 
 1. download the `www` directory from the repo's root and place it in a directory that is accessible to karmabot.
-2. run `./karmabot -token YOUR_SLACK_TOKEN -webuipath /path/to/www -listenaddr 127.0.0.1:9000`. The initial values do not matter, as they will not be used at all. karmabot will generate a random TOTP key for you to use, print it, and exit. Copy that token.
+2. run `./karmabot -token x -webui.listenaddr x -webui.path x`. You may keep all the options set to `x`, as they will not be used at all. karmabot will generate a random TOTP key for you to use, print it, and exit. Copy that token.
 
 #### Start karmabot
 
 Once you have performed the steps detailed above, pass the necessary options to the `karmabot` binary:
 
-| option               | required? | description                              | default                           |
-| -------------------- | --------- | ---------------------------------------- | --------------------------------- |
-| `-listenaddr string` | **yes**   | the address (`host:port`) on which to serve the web UI |                                   |
-| `-totp string`       | **yes**   | the TOTP key (see above)                 |                                   |
-| `-webuipath string`  | **yes**   | path to the `www` directory (see above)  |                                   |
-| `-webuiurl string`   | no        | the URL which karmabot should use to generate links to the web UI | defaults to `-listenaddr`'s value |
+| option                     | required? | description                              | default                               |
+| -------------------------- | --------- | ---------------------------------------- | ------------------------------------- |
+| `-webui.listenaddr string` | **yes**   | the address (`host:port`) on which to serve the web UI |                                       |
+| `-webui.totp string`       | **yes**   | the TOTP key (see above)                 |                                       |
+| `-webui.path string`       | **yes**   | path to the `www` directory (see above)  |                                       |
+| `-webui.url string`        | no        | the URL which karmabot should use to generate links to the web UI (_without_ a trailing slash!) | defaults to `http://webui.listenaddr` |
 
 
-If done correctly, the web UI should be accessible on the `listenaddr` that you have configured.
+If done correctly, the web UI should be accessible on the `webui.listenaddr` that you have configured. The web UI will not be started if only of `webui.listenaddr` and `webui.path` is missing.
 
 #### Usage
 
