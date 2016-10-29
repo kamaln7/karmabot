@@ -16,10 +16,11 @@ import (
 
 var (
 	regexps = struct {
-		Motivate, GiveKarma, Leaderboard, URL, SlackUser *regexp.Regexp
+		Motivate, GiveKarma, QueryKarma, Leaderboard, URL, SlackUser *regexp.Regexp
 	}{
 		Motivate:    karmaReg.GetMotivate(),
 		GiveKarma:   karmaReg.GetGive(),
+		QueryKarma:  karmaReg.GetQuery(),
 		Leaderboard: regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
 		URL:         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
 		SlackUser:   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
@@ -90,6 +91,7 @@ func (b *Bot) handleError(err error, channel string) bool {
 		return false
 	}
 
+	fmt.Printf("%#v\n%T\n", err, err)
 	b.Config.Log.Err(err).Error("error")
 	var message string
 	if b.Config.Debug {
@@ -123,6 +125,9 @@ func (b *Bot) handleMessageEvent(ev *slack.MessageEvent) {
 
 	case regexps.Leaderboard.MatchString(ev.Text):
 		b.printLeaderboard(ev)
+
+	case regexps.QueryKarma.MatchString(ev.Text):
+		b.queryKarma(ev)
 	}
 }
 
@@ -255,4 +260,27 @@ func (b *Bot) getUserNameByID(id string) (string, error) {
 	}
 
 	return userInfo.Name, nil
+}
+
+func (b *Bot) queryKarma(ev *slack.MessageEvent) {
+	match := regexps.QueryKarma.FindStringSubmatch(ev.Text)
+	if len(match) == 0 {
+		return
+	}
+
+	name, err := b.parseUser(match[1])
+	if b.handleError(err, ev.Channel) {
+		return
+	}
+	name = strings.ToLower(name)
+
+	user, err := b.Config.DB.GetUser(name)
+	switch {
+	case err == database.ErrNoSuchUser:
+		// override debug mode
+		b.SendMessage(err.Error(), ev.Channel)
+	case b.handleError(err, ev.Channel):
+	default:
+		b.SendMessage(fmt.Sprintf("%s == %d", user.Name, user.Points), ev.Channel)
+	}
 }

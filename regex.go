@@ -61,3 +61,18 @@ func (r *karmaRegex) GetMotivate() *regexp.Regexp {
 
 	return regexp.MustCompile(expression)
 }
+
+func (r *karmaRegex) GetQuery() *regexp.Regexp {
+	expression := strings.Join(
+		[]string{
+			`^`,
+			r.user,
+			r.autocomplete,
+			"==",
+			"$",
+		},
+		"",
+	)
+
+	return regexp.MustCompile(expression)
+}

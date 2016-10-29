@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"strings"
 
 	"github.com/aybabtme/log"
@@ -38,6 +39,10 @@ type User struct {
 	Name   string
 	Points int
 }
+
+// ErrNoSuchUser is returned when a user lookup
+// is performed on a non-existent user
+var ErrNoSuchUser = errors.New("no such user")
 
 // New returns a new instance of a karmabot database
 // and initializes it
@@ -109,7 +114,7 @@ func (db *DB) InsertPoints(points *Points) error {
 
 // GetUser returns info about a user.
 func (db *DB) GetUser(name string) (*User, error) {
-	stmt, err := db.SQL.Prepare("select sum(`points`) as `points` from karma where `to` = ?")
+	stmt, err := db.SQL.Prepare("select count(`to`) as `count` from karma where `to` = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +123,22 @@ func (db *DB) GetUser(name string) (*User, error) {
 	user := &User{
 		Name: name,
 	}
+
+	var userExists int
+	err = stmt.QueryRow(user.Name).Scan(&userExists)
+	if err != nil {
+		return nil, err
+	}
+	if userExists == 0 {
+		return nil, ErrNoSuchUser
+	}
+
+	stmt, err = db.SQL.Prepare("select sum(`points`) as `points` from karma where `to` = ?")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
 	err = stmt.QueryRow(user.Name).Scan(&user.Points)
 	if err != nil {
 		return nil, err
