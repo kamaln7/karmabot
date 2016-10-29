@@ -25,16 +25,21 @@ var (
 	webuilistenaddr  = flag.String("webui.listenaddr", "", "address to listen and serve the web ui on")
 	webuiurl         = flag.String("webui.url", "", "url address for accessing the web ui")
 	motivate         = flag.Bool("motivate", true, "toggle motivate.im support")
+	blacklist        = make(karmabot.UserBlacklist, 0)
 )
 
 func main() {
-	// startup
+	// logging
 
 	ll := log.KV("version", karmabot.Version)
-	ll.Info("starting karmabot")
 
-	// config
+	// cli flags
+	flag.Var(&blacklist, "blacklist", "blacklist users from having karma operations applied on them")
 	flag.Parse()
+
+	// startup
+
+	ll.Info("starting karmabot")
 
 	// database
 
@@ -95,6 +100,7 @@ func main() {
 		LeaderboardLimit: *leaderboardlimit,
 		Log:              ll,
 		DB:               db,
+		UserBlacklist:    blacklist,
 	})
 
 	bot.Listen()
