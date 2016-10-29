@@ -1,4 +1,4 @@
-package web
+package webui
 
 import (
 	"fmt"
@@ -10,14 +10,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Handlers contains all the http.HandlerFuncs
+// that serve the web UI's routes.
 type Handlers struct {
 	ui *UI
 }
 
+// Home redirects to the leaderboard view.
 func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/leaderboard", 302)
 }
 
+// Leaderboard serves the leaderboard view.
 func (h *Handlers) Leaderboard(w http.ResponseWriter, r *http.Request) {
 	var (
 		limit int
@@ -64,6 +68,8 @@ func (h *Handlers) Leaderboard(w http.ResponseWriter, r *http.Request) {
 	h.ui.renderTemplate(w, "leaderboard.html", data)
 }
 
+// NotFound handles invalid URIs that do not
+// have a matching route.
 func (h *Handlers) NotFound(w http.ResponseWriter, r *http.Request) {
 	h.ui.renderTemplate(w, "error.html", &templateData{
 		Data: &struct {

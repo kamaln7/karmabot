@@ -91,7 +91,7 @@ Once you have performed the steps detailed above, pass the necessary options to 
 | `-webui.url string`        | no        | the URL which karmabot should use to generate links to the web UI (_without_ a trailing slash!) | defaults to `http://webui.listenaddr` |
 
 
-If done correctly, the web UI should be accessible on the `webui.listenaddr` that you have configured. The web UI will not be started if only of `webui.listenaddr` and `webui.path` is missing.
+If done correctly, the web UI should be accessible on the `webui.listenaddr` that you have configured. The web UI will not be started if either of `webui.listenaddr` or `webui.path` are missing.
 
 #### Usage
 

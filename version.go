@@ -1,3 +1,4 @@
 package karmabot
 
-const VERSION = "1.0.0"
+// Version is the current version of karmabot.
+const Version = "1.0.0"

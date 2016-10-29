@@ -10,23 +10,31 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+// Config contains the config options for the
+// TOTP authentication serivce that is used
+// for the web UI.
 type Config struct {
 	Token string
 	Log   *log.Log
 }
 
+// An Authenticator contains a list of authenticated
+// web UI sessions and exposes a few functions
+// for authenticating users and generating tokens.
 type Authenticator struct {
 	Config        *Config
 	authedClients []*Client
 	clientsMutex  sync.RWMutex
 }
 
-// Client is an authenticated web ui session
+// A Client is an authenticated web UI session
 type Client struct {
 	UUID  string
 	Added time.Time
 }
 
+// New returns a new Authenticator instance and spins
+// up a goroutine that handles expiring sessions
 func New(config *Config) *Authenticator {
 	authenticator := &Authenticator{
 		Config: config,
@@ -36,6 +44,9 @@ func New(config *Config) *Authenticator {
 	return authenticator
 }
 
+// Authenticate logs in the client if the request contains
+// a token and checks whether the current request is
+// authenticated.
 func (a *Authenticator) Authenticate(w http.ResponseWriter, r *http.Request) (bool, error) {
 	cookie, err := r.Cookie("session")
 
@@ -91,6 +102,8 @@ func (a *Authenticator) hasValidToken(r *http.Request) bool {
 	return totp.Validate(token, a.Config.Token)
 }
 
+// ExpireClients expires all sessions that have been logged
+// in for 48+ hours.
 func (a *Authenticator) ExpireClients() {
 	for {
 		<-time.After(2 * time.Minute)
@@ -110,6 +123,8 @@ func (a *Authenticator) ExpireClients() {
 	}
 }
 
+// GetToken generates a TOTP token that is
+// valid for 30 seconds.
 func (a *Authenticator) GetToken() (string, error) {
 	return totp.GenerateCode(a.Config.Token, time.Now())
 }

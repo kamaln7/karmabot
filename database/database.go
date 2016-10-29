@@ -5,33 +5,42 @@ import (
 	"strings"
 
 	"github.com/aybabtme/log"
+
+	// import the sqlite3 driver
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Config contains the necessary config options to
+// connect to an sqlite3 database.
 type Config struct {
 	Path string
 	Log  *log.Log
 }
 
+// A DB in an instance of a karmabot database.
 type DB struct {
 	Config *Config
 	SQL    *sql.DB
 }
 
+// Points is a karma record containing info about
+// a karma operation.
 type Points struct {
 	From, To, Reason string
 	Points           int
 }
 
-// The Leaderboard lists the top X users
+// The Leaderboard lists the top X users.
 type Leaderboard []*User
 
-// User is an entry in the Leaderboard
+// A User is an entry in the Leaderboard.
 type User struct {
 	Name   string
 	Points int
 }
 
+// New returns a new instance of a karmabot database
+// and initializes it
 func New(config *Config) (*DB, error) {
 	instance := &DB{
 		Config: config,
@@ -46,6 +55,8 @@ func New(config *Config) (*DB, error) {
 	return instance, nil
 }
 
+// Init initializes an sqlite3 database in order
+// for karmabot to be able to use it
 func (db *DB) Init() error {
 	sqlite, err := sql.Open("sqlite3", db.Config.Path)
 
@@ -58,25 +69,23 @@ func (db *DB) Init() error {
 }
 
 func (db *DB) createTable() error {
-	schema := `
-		create table if not exists karma (
-		^id^ integer primary key,
-		^from^ text not null,
-		^to^ text not null,
-		^points^ integer not null,
-		^reason^ text,
-		^timestamp^ text not null default (datetime('now'))
-	)`
-	schema = strings.Replace(schema, "^", "`", -1)
+	schema := strings.Replace(
+		`create table if not exists karma (
+			^id^ integer primary key,
+			^from^ text not null,
+			^to^ text not null,
+			^points^ integer not null,
+			^reason^ text,
+			^timestamp^ text not null default (datetime('now'))
+		)`,
+		"^", "`", -1)
 
 	_, err := db.SQL.Exec(schema)
 	if err != nil {
 		return err
 	}
 
-	indexes := "create index if not exists idx_to on karma(`to`);"
-
-	_, err = db.SQL.Exec(indexes)
+	_, err = db.SQL.Exec("create index if not exists idx_to on karma(`to`);")
 	if err != nil {
 		return err
 	}
@@ -84,7 +93,7 @@ func (db *DB) createTable() error {
 	return nil
 }
 
-// InsertPoints inserts a karma operation into the database
+// InsertPoints inserts a Points object into the database.
 func (db *DB) InsertPoints(points *Points) error {
 	stmt, err := db.SQL.Prepare("insert into karma (`from`, `to`, `reason`, `points`) values(?, ?, ?, ?)")
 
@@ -98,9 +107,9 @@ func (db *DB) InsertPoints(points *Points) error {
 	return err
 }
 
-// GetUser returns info about a user
+// GetUser returns info about a user.
 func (db *DB) GetUser(name string) (*User, error) {
-	stmt, err := db.SQL.Prepare("select sum(`points`) as points from karma where `to` = ?")
+	stmt, err := db.SQL.Prepare("select sum(`points`) as `points` from karma where `to` = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +126,9 @@ func (db *DB) GetUser(name string) (*User, error) {
 	return user, nil
 }
 
-// GetLeaderboard returns the leaderboard with the top X users
+// GetLeaderboard returns the leaderboard with the top X users.
 func (db *DB) GetLeaderboard(limit int) (Leaderboard, error) {
-	rows, err := db.SQL.Query("select `to`,sum(points) as points from karma group by `to` order by `points` desc limit ?", limit)
+	rows, err := db.SQL.Query("select `to`, sum(`points`) as `points` from karma group by `to` order by `points` desc limit ?", limit)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +150,7 @@ func (db *DB) GetLeaderboard(limit int) (Leaderboard, error) {
 }
 
 // GetTotalPoints returns the amount of points given or taken
-// for all users
+// for all users.
 func (db *DB) GetTotalPoints() (int, error) {
 	var res int
 	err := db.SQL.QueryRow("select sum(abs(`points`)) from karma").Scan(&res)

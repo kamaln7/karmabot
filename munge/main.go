@@ -55,6 +55,8 @@ var charMap = map[byte]rune{
 	'Z': '\u017b',
 }
 
+// Munge replaces the first character of a string
+// with a similar-looking unicode character
 func Munge(str string) string {
 	if len(str) < 1 {
 		return str

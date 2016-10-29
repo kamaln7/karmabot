@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/kamaln7/karmabot/database"
-	"github.com/kamaln7/karmabot/math"
 	"github.com/kamaln7/karmabot/munge"
 	"github.com/kamaln7/karmabot/ui"
 
@@ -27,11 +26,13 @@ var (
 	}
 )
 
+// Slack contains the Slack client and RTM object.
 type Slack struct {
 	Bot *slack.Client
 	RTM *slack.RTM
 }
 
+// Config contains all the necessary configs for karmabot.
 type Config struct {
 	Slack                       *Slack
 	Debug, Motivate             bool
@@ -41,16 +42,20 @@ type Config struct {
 	DB                          *database.DB
 }
 
+// A Bot is an instance of karmabot.
 type Bot struct {
 	Config *Config
 }
 
+// New returns a pointer to an new instance of karmabot.
 func New(config *Config) *Bot {
 	return &Bot{
 		Config: config,
 	}
 }
 
+// Listen starts listening for Slack messages and calls the
+// appropriate handlers.
 func (b *Bot) Listen() {
 	for {
 		select {
@@ -75,6 +80,7 @@ func (b *Bot) Listen() {
 	}
 }
 
+// SendMessage sends a message to a Slack channel.
 func (b *Bot) SendMessage(message, channel string) {
 	b.Config.Slack.RTM.SendMessage(b.Config.Slack.RTM.NewOutgoingMessage(message, channel))
 }
@@ -159,7 +165,7 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 	}
 	to = strings.ToLower(to)
 
-	points := math.Min(len(match[2])-1, b.Config.MaxPoints)
+	points := min(len(match[2])-1, b.Config.MaxPoints)
 	if match[2][0] == '-' {
 		points *= -1
 	}
