@@ -27,7 +27,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 
 - `@username: ++`
 - `@username++`
-- `username: ++`
+- `username ++`
 - `!m @username: `
 - etc.
 
@@ -37,10 +37,11 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 
 1. clone the repo:
     1. `git clone -b v1.0.0 https://github.com/kamaln7/karmabot.git`
-2. run `go get` and then `go build` inside the repo's root
+2. run `go get` and then `go build` in `/cmd/karmabot`
     1. `cd karmabot`
     2. `go get`
-    3. `go build`
+    3. `cd cmd/karmabot`
+    4. `go build`
 
 ### Download a Pre-built Release
 
