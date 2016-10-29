@@ -15,6 +15,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 - add a message/reason for a karma operation:
   - `<user>++ for <message>`; or
   - `<user>++ <message>`
+- query a user's current points: `<user>==`
 - [motivate.im](http://motivate.im/) support:
   - `?m <user>`
   - `!m <user>`
