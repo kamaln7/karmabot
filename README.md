@@ -63,12 +63,13 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 | `-leaderboardlimit int` | no        | the default amount of users to list in the leaderboard | `10`           |
 | `-maxpoints int`        | no        | the maximum amount of points that users can give/take at once | `6`            |
 | `-motivate=bool`        | no        | toggle [motivate.im](http://motivate.im/) support | `true`         |
+| `-blacklist string`     | no        | **may be specified multiple times** blacklist `string`  i.e. ignore karma commands for `string` | `[]`           |
 
 In addition, see the table below for the options related to the web UI.
 
 **example:** `./karmabot -token xoxb-abcdefg`
 
-I recommend passing karmabot's logs through [humanlog](https://github.com/aybabtme/humanlog). humanlog will format and color the JSON output as nice easy-to-read text.
+It is recommended to pass karmabot's logs through [humanlog](https://github.com/aybabtme/humanlog). humanlog will format and color the JSON output as nice easy-to-read text.
 
 ## Web UI
 
