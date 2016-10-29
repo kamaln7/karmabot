@@ -49,7 +49,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 
 ## Usage
 
-1. add a **Slack Bot** integration: `https://team.slack.com/apps/A0F7YS25R-bots` 
+1. add a **Slack Bot** integration: `https://team.slack.com/apps/A0F7YS25R-bots`. an avatar is available [here](/avatar.png).
 2. invite `karmabot` to any existing channels and all future channels (this is a limitation of Slack's bot API, unfortunately)
 3. run `karmabot`. the following options are supported:
 
