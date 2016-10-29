@@ -11,7 +11,7 @@ type karmaRegex struct {
 }
 
 var karmaReg = &karmaRegex{
-	user:                 `@??((?:<@)??\w[A-Za-z0-9_\-@<>]+?)`,
+	user:                 `@??((?:<@)??[A-Za-z0-9_\-@<>]+?)`,
 	autocomplete:         `:?? ??`,
 	explicitAutocomplete: `(?:: )??`,
 	points:               `([\+]{2,}|[\-]{2,})`,
