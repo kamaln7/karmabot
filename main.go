@@ -18,7 +18,7 @@ var (
 	regexps = struct {
 		Motivate, GiveKarma, Leaderboard, URL, SlackUser *regexp.Regexp
 	}{
-		Motivate:    regexp.MustCompile(`^(?:\?|!)m\s+@?([^\s]+?)(?:\:\s)?$`),
+		Motivate:    karmaReg.GetMotivate(),
 		GiveKarma:   karmaReg.GetGive(),
 		Leaderboard: regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
 		URL:         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),

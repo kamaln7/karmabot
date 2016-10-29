@@ -47,3 +47,17 @@ func (r *karmaRegex) GetGive() *regexp.Regexp {
 
 	return regexp.MustCompile(expression)
 }
+
+func (r *karmaRegex) GetMotivate() *regexp.Regexp {
+	expression := strings.Join(
+		[]string{
+			`^(?:\?|!)m +`,
+			r.user,
+			r.autocomplete,
+			"$",
+		},
+		"",
+	)
+
+	return regexp.MustCompile(expression)
+}
