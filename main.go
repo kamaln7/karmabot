@@ -41,6 +41,7 @@ type Config struct {
 	Log                         *log.Log
 	UI                          ui.Provider
 	DB                          *database.DB
+	UserBlacklist               UserBlacklist
 }
 
 // A Bot is an instance of karmabot.
@@ -169,6 +170,11 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 		return
 	}
 	to = strings.ToLower(to)
+
+	if _, blacklisted := b.Config.UserBlacklist[to]; blacklisted {
+		b.Config.Log.KV("user", to).Info("user is blacklisted, ignoring karma command")
+		return
+	}
 
 	points := min(len(match[2])-1, b.Config.MaxPoints)
 	if match[2][0] == '-' {
