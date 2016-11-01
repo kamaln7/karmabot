@@ -36,6 +36,7 @@ var regexTests = map[regexPattern]regexTestSuite{
 			"@user-+",
 			"middle of the sentence -- test",
 			"middle of the sentence ++",
+			"middle of the sentence ---- another test",
 		},
 	},
 	regexPattern{
