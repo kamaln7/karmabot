@@ -64,6 +64,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 | `-maxpoints int`        | no        | the maximum amount of points that users can give/take at once | `6`            |
 | `-motivate=bool`        | no        | toggle [motivate.im](http://motivate.im/) support | `true`         |
 | `-blacklist string`     | no        | **may be specified multiple times** blacklist `string`  i.e. ignore karma commands for `string` | `[]`           |
+| `-reactji bool`         | no        | use reactji (👍 and 👎) as reaction events | `true`         |
 
 In addition, see the table below for the options related to the web UI.
 

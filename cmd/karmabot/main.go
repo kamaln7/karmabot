@@ -26,6 +26,7 @@ var (
 	webuiurl         = flag.String("webui.url", "", "url address for accessing the web ui")
 	motivate         = flag.Bool("motivate", true, "toggle motivate.im support")
 	blacklist        = make(karmabot.UserBlacklist, 0)
+	reactji          = flag.Bool("reactji", true, "use reactji as karma operations")
 )
 
 func main() {
@@ -101,6 +102,7 @@ func main() {
 		Log:              ll,
 		DB:               db,
 		UserBlacklist:    blacklist,
+		Reactji:          *reactji,
 	})
 
 	bot.Listen()
