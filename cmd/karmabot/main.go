@@ -103,6 +103,7 @@ func main() {
 		DB:               db,
 		UserBlacklist:    blacklist,
 		Reactji:          *reactji,
+		Motivate:         *motivate,
 	})
 
 	bot.Listen()
