@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"strings"
 
 	"github.com/kamaln7/karmabot"
 	"github.com/kamaln7/karmabot/database"
@@ -25,8 +26,9 @@ var (
 	webuilistenaddr  = flag.String("webui.listenaddr", "", "address to listen and serve the web ui on")
 	webuiurl         = flag.String("webui.url", "", "url address for accessing the web ui")
 	motivate         = flag.Bool("motivate", true, "toggle motivate.im support")
-	blacklist        = make(karmabot.UserBlacklist, 0)
+	blacklist        = make(karmabot.StringList, 0)
 	reactji          = flag.Bool("reactji", true, "use reactji as karma operations")
+	aliases          = make(karmabot.StringList, 0)
 )
 
 func main() {
@@ -35,12 +37,28 @@ func main() {
 	ll := log.KV("version", karmabot.Version)
 
 	// cli flags
+
 	flag.Var(&blacklist, "blacklist", "blacklist users from having karma operations applied on them")
+	flag.Var(&aliases, "alias", "alias different users to one user")
 	flag.Parse()
 
 	// startup
 
 	ll.Info("starting karmabot")
+
+	// format aliases
+	aliasMap := make(karmabot.UserAliases, 0)
+	for k, _ := range aliases {
+		users := strings.Split(k, "++")
+		if len(users) <= 1 {
+			ll.Fatal("invalid alias format. see documentation")
+		}
+
+		user := users[0]
+		for _, alias := range users[1:] {
+			aliasMap[alias] = user
+		}
+	}
 
 	// database
 
@@ -104,6 +122,7 @@ func main() {
 		UserBlacklist:    blacklist,
 		Reactji:          *reactji,
 		Motivate:         *motivate,
+		Aliases:          aliasMap,
 	})
 
 	bot.Listen()
