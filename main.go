@@ -41,7 +41,7 @@ type Config struct {
 	Log                         *log.Log
 	UI                          ui.Provider
 	DB                          *database.DB
-	UserBlacklist               UserBlacklist
+	UserBlacklist               StringList
 }
 
 // A Bot is an instance of karmabot.

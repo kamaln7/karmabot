@@ -25,7 +25,7 @@ var (
 	webuilistenaddr  = flag.String("webui.listenaddr", "", "address to listen and serve the web ui on")
 	webuiurl         = flag.String("webui.url", "", "url address for accessing the web ui")
 	motivate         = flag.Bool("motivate", true, "toggle motivate.im support")
-	blacklist        = make(karmabot.UserBlacklist, 0)
+	blacklist        = make(karmabot.StringList, 0)
 	reactji          = flag.Bool("reactji", true, "use reactji as karma operations")
 )
 
