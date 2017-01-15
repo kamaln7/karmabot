@@ -33,6 +33,9 @@ type Slack struct {
 	RTM *slack.RTM
 }
 
+// UserAliases is a map of alias -> main username
+type UserAliases map[string]string
+
 // Config contains all the necessary configs for karmabot.
 type Config struct {
 	Slack                       *Slack
@@ -42,6 +45,7 @@ type Config struct {
 	UI                          ui.Provider
 	DB                          *database.DB
 	UserBlacklist               StringList
+	Aliases                     UserAliases
 }
 
 // A Bot is an instance of karmabot.
@@ -357,7 +361,16 @@ func (b *Bot) printLeaderboard(ev *slack.MessageEvent) {
 
 func (b *Bot) parseUser(user string) (string, error) {
 	if match := regexps.SlackUser.FindStringSubmatch(user); len(match) > 0 {
-		return b.getUserNameByID(match[1])
+		var err error
+		user, err = b.getUserNameByID(match[1])
+		if err != nil {
+			return "", err
+		}
+	}
+
+	// check if it is aliased
+	if alias, ok := b.Config.Aliases[user]; ok {
+		user = alias
 	}
 
 	return user, nil
