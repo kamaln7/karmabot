@@ -38,14 +38,14 @@ type UserAliases map[string]string
 
 // Config contains all the necessary configs for karmabot.
 type Config struct {
-	Slack                       *Slack
-	Debug, Motivate, Reactji    bool
-	MaxPoints, LeaderboardLimit int
-	Log                         *log.Log
-	UI                          ui.Provider
-	DB                          *database.DB
-	UserBlacklist               StringList
-	Aliases                     UserAliases
+	Slack                               *Slack
+	Debug, Motivate, Reactji, SelfKarma bool
+	MaxPoints, LeaderboardLimit         int
+	Log                                 *log.Log
+	UI                                  ui.Provider
+	DB                                  *database.DB
+	UserBlacklist                       StringList
+	Aliases                             UserAliases
 }
 
 // A Bot is an instance of karmabot.
@@ -280,6 +280,11 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 		points *= -1
 	}
 	reason := match[3]
+
+	if !b.Config.SelfKarma && from == to {
+		b.SendMessage("Sorry, you are not allowed to do that.", ev.Channel)
+		return
+	}
 
 	record := &database.Points{
 		From:   from,

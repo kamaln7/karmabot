@@ -29,6 +29,7 @@ var (
 	blacklist        = make(karmabot.StringList, 0)
 	reactji          = flag.Bool("reactji", true, "use reactji as karma operations")
 	aliases          = make(karmabot.StringList, 0)
+	selfkarma        = flag.Bool("selfkarma", true, "allow users to add/remove karma to themselves")
 )
 
 func main() {
@@ -123,6 +124,7 @@ func main() {
 		Reactji:          *reactji,
 		Motivate:         *motivate,
 		Aliases:          aliasMap,
+		SelfKarma:        *selfkarma,
 	})
 
 	bot.Listen()
