@@ -68,6 +68,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 | `-blacklist string`     | no        | **may be passed multiple times** blacklist `string`  i.e. ignore karma commands for `string` | `[]`           |
 | `-reactji bool`         | no        | use reactji (👍 and 👎) as reaction events | `true`         |
 | `-alias string`         | no        | **may be passed multiple times** alias different users to one user. syntax: `-alias main++alias1++alias2++...++aliasN` |                |
+| `-selfkarma bool`       | yes       | allow users to add/remove karma to themselves | `true`         |
 
 In addition, see the table below for the options related to the web UI.
 
