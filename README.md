@@ -107,6 +107,30 @@ The web UI is authenticated, so you will have to generate authentication tokens 
 
 Additionally, you may use also use the link provided in the Slack leaderboard (`karmabot leaderboard`) in order to log in and access the leaderboard.
 
+## karmabotctl
+
+karmabot comes with a maintenance tool called `karmabotctl`. It can be used to perform certain tasks without having to run `karmabot` itself.
+
+### Commands
+
+A list of all arguments for each command can be printed by running `karmabotctl karma migrate --help`. In addition to the arguments listed in the tables below, some commands may also require a `<db>` argument containing the path to the database file.
+
+#### karma
+
+| command | arguments                       | description                             |
+| ------- | ------------------------------- | --------------------------------------- |
+| add     | `<from> <to> <reason> <points>` | add karma to a user                     |
+| migrate | `<from> <to>`                   | move a user's karma to another user     |
+| reset   | `<user>`                        | reset a user's karma                    |
+| set     | `<user> <points>`               | set a user's karma to a specific number |
+
+#### webui
+
+| command | arguments                                | description                              |
+| ------- | ---------------------------------------- | ---------------------------------------- |
+| serve   | `<debug> <leaderboardlimit> <totp> <path> <listenaddr> <url>` | start a webserver                        |
+| totp    | `<totp>`                                 | generate a TOTP token based on the passed secret |
+
 ## License
 
 see [./LICENSE](/LICENSE)
