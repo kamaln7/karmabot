@@ -39,12 +39,14 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 ### Build from Source
 
 1. clone the repo:
-    1. `git clone -b v1.3.2 https://github.com/kamaln7/karmabot.git`
-2. run `go get` and then `go build` in `/cmd/karmabot`
+    1. `git clone -b v1.4.0 https://github.com/kamaln7/karmabot.git`
+2. run `go get` and then `go build` in `/cmd/karmabot` and `/cmd/karmabotctl`
     1. `cd karmabot`
     2. `go get`
     3. `cd cmd/karmabot`
     4. `go build`
+    5. `cd ../karmabotctl`
+    6. `go build`
 
 ### Download a Pre-built Release
 
