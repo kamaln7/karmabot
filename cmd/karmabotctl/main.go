@@ -2,14 +2,11 @@ package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/kamaln7/karmabot"
 	"github.com/kamaln7/karmabot/database"
-	"github.com/kamaln7/karmabot/ui/webui"
 
 	"github.com/aybabtme/log"
-	"github.com/pquerna/otp/totp"
 	"github.com/urfave/cli"
 )
 
@@ -31,7 +28,7 @@ func main() {
 	// general flags
 
 	dbpath := cli.StringFlag{
-		Name:  "dbpath",
+		Name:  "db",
 		Value: "./db.sqlite3",
 		Usage: "path to sqlite database",
 	}
@@ -52,7 +49,7 @@ func main() {
 	webuiCommands := []cli.Command{
 		{
 			Name:  "totp",
-			Usage: "get a URL with a valid TOTP token",
+			Usage: "generate a TOTP token",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "totp",
@@ -112,6 +109,48 @@ func main() {
 			},
 			Action: addKarma,
 		},
+		{
+			Name:  "migrate",
+			Usage: "move a user's karma to another user",
+			Flags: []cli.Flag{
+				dbpath,
+				cli.StringFlag{
+					Name: "from",
+				},
+				cli.StringFlag{
+					Name: "to",
+				},
+				cli.StringFlag{
+					Name: "reason",
+				},
+			},
+			Action: migrateKarma,
+		},
+		{
+			Name:  "reset",
+			Usage: "reset a user's karma",
+			Flags: []cli.Flag{
+				dbpath,
+				cli.StringFlag{
+					Name: "user",
+				},
+			},
+			Action: resetKarma,
+		},
+		{
+			Name:  "set",
+			Usage: "set a user's karma to a specific number",
+			Flags: []cli.Flag{
+				dbpath,
+				cli.StringFlag{
+					Name: "user",
+				},
+				cli.IntFlag{
+					Name: "points",
+				},
+			},
+			Action: setKarma,
+		},
 	}
 
 	// main app
@@ -140,70 +179,4 @@ func getDB(path string) *database.DB {
 	}
 
 	return db
-}
-
-func serve(c *cli.Context) error {
-	db := getDB(c.String("dbpath"))
-
-	ui, err := webui.New(&webui.Config{
-		ListenAddr:       c.String("listenaddr"),
-		URL:              c.String("url"),
-		FilesPath:        c.String("path"),
-		TOTP:             c.String("totp"),
-		LeaderboardLimit: c.Int("leaderboardlimit"),
-		Log:              ll.KV("provider", "webui"),
-		Debug:            c.Bool("debug"),
-		DB:               db,
-	})
-
-	if err != nil {
-		ll.Err(err).Fatal("could not initialize web ui")
-	}
-
-	ui.Listen()
-	return nil
-}
-
-func mktotp(c *cli.Context) error {
-	TOTP := c.String("totp")
-	token, err := totp.GenerateCode(TOTP, time.Now())
-	if err != nil {
-		ll.Err(err).Fatal("could not generate token")
-	}
-
-	ll.KV("token", token).Info("generated token")
-
-	return nil
-}
-
-func addKarma(c *cli.Context) error {
-	var (
-		db     = getDB(c.String("dbpath"))
-		from   = c.String("from")
-		to     = c.String("to")
-		reason = c.String("reason")
-		points = c.Int("points")
-	)
-
-	if from == "" || to == "" {
-		ll.Fatal("please pass valid users to the `to` and `from` options")
-	}
-
-	if points == 0 {
-		ll.Fatal("you may not add 0 points to a user")
-	}
-
-	record := &database.Points{
-		From:   from,
-		To:     to,
-		Reason: reason,
-		Points: points,
-	}
-
-	err := db.InsertPoints(record)
-	if err != nil {
-		ll.Err(err).Fatal("could not insert record")
-	}
-
-	return nil
 }
