@@ -113,9 +113,13 @@ func (a *Authenticator) ExpireClients() {
 			a.clientsMutex.RLock()
 			for i, client := range a.authedClients {
 				if now.Sub(client.Added).Hours() >= 48 {
+					a.clientsMutex.RUnlock()
 					a.clientsMutex.Lock()
+
 					a.authedClients = append(a.authedClients[:i], a.authedClients[i+1:]...)
+
 					a.clientsMutex.Unlock()
+					a.clientsMutex.RLock()
 				}
 			}
 			a.clientsMutex.RUnlock()
