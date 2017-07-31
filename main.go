@@ -86,29 +86,26 @@ func New(config *Config) *Bot {
 // Listen starts listening for Slack messages and calls the
 // appropriate handlers.
 func (b *Bot) Listen() {
-	for {
-		select {
-		case msg := <-b.Config.Slack.IncomingEventsChan():
-			switch ev := msg.Data.(type) {
-			case *slack.ReactionAddedEvent:
-				go b.handleReactionAddedEvent(msg.Data.(*slack.ReactionAddedEvent))
-			case *slack.ReactionRemovedEvent:
-				go b.handleReactionRemovedEvent(msg.Data.(*slack.ReactionRemovedEvent))
-			case *slack.MessageEvent:
-				go b.handleMessageEvent(msg.Data.(*slack.MessageEvent))
-			case *slack.ConnectedEvent:
-				b.Config.Log.Info("connected to slack")
+	for msg := range b.Config.Slack.IncomingEventsChan() {
+		switch ev := msg.Data.(type) {
+		case *slack.ReactionAddedEvent:
+			go b.handleReactionAddedEvent(msg.Data.(*slack.ReactionAddedEvent))
+		case *slack.ReactionRemovedEvent:
+			go b.handleReactionRemovedEvent(msg.Data.(*slack.ReactionRemovedEvent))
+		case *slack.MessageEvent:
+			go b.handleMessageEvent(msg.Data.(*slack.MessageEvent))
+		case *slack.ConnectedEvent:
+			b.Config.Log.Info("connected to slack")
 
-				if b.Config.Debug {
-					b.Config.Log.KV("info", ev.Info).Info("got slack info")
-					b.Config.Log.KV("connections", ev.ConnectionCount).Info("got connection count")
-				}
-			case *slack.RTMError:
-				b.Config.Log.Err(ev).Error("slack rtm error")
-			case *slack.InvalidAuthEvent:
-				b.Config.Log.Fatal("invalid slack token")
-			default:
+			if b.Config.Debug {
+				b.Config.Log.KV("info", ev.Info).Info("got slack info")
+				b.Config.Log.KV("connections", ev.ConnectionCount).Info("got connection count")
 			}
+		case *slack.RTMError:
+			b.Config.Log.Err(ev).Error("slack rtm error")
+		case *slack.InvalidAuthEvent:
+			b.Config.Log.Fatal("invalid slack token")
+		default:
 		}
 	}
 }
