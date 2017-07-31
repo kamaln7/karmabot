@@ -27,6 +27,21 @@ var (
 	}
 )
 
+// Database is an abstraction around the database, mostly designed for use in tests.
+type Database interface {
+	// InsertPoints persistently records that points have been given or deducted.
+	InsertPoints(points *database.Points) error
+
+	// GetUser returns information about a user, including their current number of points.
+	GetUser(name string) (*database.User, error)
+
+	// GetLeaderboard returns the top X users with the most points, in order.
+	GetLeaderboard(limit int) (database.Leaderboard, error)
+
+	// GetTotalPoints returns the total number of points transferred across all users.
+	GetTotalPoints() (int, error)
+}
+
 // ChatService is an abstraction around Slack, mostly designed for use in tests.
 type ChatService interface {
 	// IncomingEventsChan returns a channel of real-time events.
@@ -66,7 +81,7 @@ type Config struct {
 	MaxPoints, LeaderboardLimit         int
 	Log                                 *log.Log
 	UI                                  ui.Provider
-	DB                                  *database.DB
+	DB                                  Database
 	UserBlacklist                       StringList
 	Aliases                             UserAliases
 }
