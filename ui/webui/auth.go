@@ -19,7 +19,7 @@ func (h *Handlers) MustAuth(next http.HandlerFunc) http.HandlerFunc {
 		if authed {
 			next(w, r)
 		} else {
-			h.ui.renderError(w, errors.New(`Your session has expired. Please type "karmabot web" and click on the generated url.`))
+			h.ui.renderError(w, errors.New(`your session has expired. Please type "karmabot web" and click on the generated url`))
 		}
 	}
 }

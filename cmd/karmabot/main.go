@@ -49,7 +49,7 @@ func main() {
 
 	// format aliases
 	aliasMap := make(karmabot.UserAliases, 0)
-	for k, _ := range aliases {
+	for k := range aliases {
 		users := strings.Split(k, "++")
 		if len(users) <= 1 {
 			ll.Fatal("invalid alias format. see documentation")
