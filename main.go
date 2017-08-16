@@ -27,10 +27,48 @@ var (
 	}
 )
 
-// Slack contains the Slack client and RTM object.
-type Slack struct {
-	Bot *slack.Client
-	RTM *slack.RTM
+// Database is an abstraction around the database, mostly designed for use in tests.
+type Database interface {
+	// InsertPoints persistently records that points have been given or deducted.
+	InsertPoints(points *database.Points) error
+
+	// GetUser returns information about a user, including their current number of points.
+	GetUser(name string) (*database.User, error)
+
+	// GetLeaderboard returns the top X users with the most points, in order.
+	GetLeaderboard(limit int) (database.Leaderboard, error)
+
+	// GetTotalPoints returns the total number of points transferred across all users.
+	GetTotalPoints() (int, error)
+}
+
+// ChatService is an abstraction around Slack, mostly designed for use in tests.
+type ChatService interface {
+	// IncomingEventsChan returns a channel of real-time events.
+	IncomingEventsChan() chan slack.RTMEvent
+
+	// NewOutgoingMessage constructs a new OutgoingMessage using the provided text and channel.
+	NewOutgoingMessage(text string, channel string) *slack.OutgoingMessage
+
+	// SendMessage sends the provided *OutgoingMessage.
+	SendMessage(msg *slack.OutgoingMessage)
+
+	// OpenIMChannel opens a new direct-message channel with the specified user.
+	// It returns some status information, and the channel ID.
+	OpenIMChannel(user string) (bool, bool, string, error)
+
+	// GetUserInfo retrieves the complete user information for the specified username.
+	GetUserInfo(user string) (*slack.User, error)
+}
+
+// SlackChatService is an implementation of ChatService using github.com/nlopes/slack.
+type SlackChatService struct {
+	slack.RTM
+}
+
+// IncomingEventsChan returns a channel of real-time messaging events.
+func (s SlackChatService) IncomingEventsChan() chan slack.RTMEvent {
+	return s.IncomingEvents
 }
 
 // UserAliases is a map of alias -> main username
@@ -38,12 +76,12 @@ type UserAliases map[string]string
 
 // Config contains all the necessary configs for karmabot.
 type Config struct {
-	Slack                               *Slack
+	Slack                               ChatService
 	Debug, Motivate, Reactji, SelfKarma bool
 	MaxPoints, LeaderboardLimit         int
 	Log                                 *log.Log
 	UI                                  ui.Provider
-	DB                                  *database.DB
+	DB                                  Database
 	UserBlacklist                       StringList
 	Aliases                             UserAliases
 }
@@ -63,43 +101,40 @@ func New(config *Config) *Bot {
 // Listen starts listening for Slack messages and calls the
 // appropriate handlers.
 func (b *Bot) Listen() {
-	for {
-		select {
-		case msg := <-b.Config.Slack.RTM.IncomingEvents:
-			switch ev := msg.Data.(type) {
-			case *slack.ReactionAddedEvent:
-				go b.handleReactionAddedEvent(msg.Data.(*slack.ReactionAddedEvent))
-			case *slack.ReactionRemovedEvent:
-				go b.handleReactionRemovedEvent(msg.Data.(*slack.ReactionRemovedEvent))
-			case *slack.MessageEvent:
-				go b.handleMessageEvent(msg.Data.(*slack.MessageEvent))
-			case *slack.ConnectedEvent:
-				b.Config.Log.Info("connected to slack")
+	for msg := range b.Config.Slack.IncomingEventsChan() {
+		switch ev := msg.Data.(type) {
+		case *slack.ReactionAddedEvent:
+			go b.handleReactionAddedEvent(msg.Data.(*slack.ReactionAddedEvent))
+		case *slack.ReactionRemovedEvent:
+			go b.handleReactionRemovedEvent(msg.Data.(*slack.ReactionRemovedEvent))
+		case *slack.MessageEvent:
+			go b.handleMessageEvent(msg.Data.(*slack.MessageEvent))
+		case *slack.ConnectedEvent:
+			b.Config.Log.Info("connected to slack")
 
-				if b.Config.Debug {
-					b.Config.Log.KV("info", ev.Info).Info("got slack info")
-					b.Config.Log.KV("connections", ev.ConnectionCount).Info("got connection count")
-				}
-			case *slack.RTMError:
-				b.Config.Log.Err(ev).Error("slack rtm error")
-			case *slack.InvalidAuthEvent:
-				b.Config.Log.Fatal("invalid slack token")
-			default:
+			if b.Config.Debug {
+				b.Config.Log.KV("info", ev.Info).Info("got slack info")
+				b.Config.Log.KV("connections", ev.ConnectionCount).Info("got connection count")
 			}
+		case *slack.RTMError:
+			b.Config.Log.Err(ev).Error("slack rtm error")
+		case *slack.InvalidAuthEvent:
+			b.Config.Log.Fatal("invalid slack token")
+		default:
 		}
 	}
 }
 
 // SendMessage sends a message to a Slack channel.
 func (b *Bot) SendMessage(message, channel, thread string) {
-	msg := b.Config.Slack.RTM.NewOutgoingMessage(message, channel)
+	msg := b.Config.Slack.NewOutgoingMessage(message, channel)
 	msg.ThreadTimestamp = thread
-	b.Config.Slack.RTM.SendMessage(msg)
+	b.Config.Slack.SendMessage(msg)
 }
 
 // DMUser sends a message directly to a Slack user.
 func (b *Bot) DMUser(message, user string) {
-	_, _, channel, err := b.Config.Slack.Bot.OpenIMChannel(user)
+	_, _, channel, err := b.Config.Slack.OpenIMChannel(user)
 	if err != nil {
 		b.Config.Log.Err(err).KV("user", user).Error("could not open IM channel with user")
 		return
@@ -383,7 +418,7 @@ func (b *Bot) parseUser(user string) (string, error) {
 }
 
 func (b *Bot) getUserNameByID(id string) (string, error) {
-	userInfo, err := b.Config.Slack.Bot.GetUserInfo(id)
+	userInfo, err := b.Config.Slack.GetUserInfo(id)
 	if err != nil {
 		return "", err
 	}

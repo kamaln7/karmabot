@@ -81,13 +81,9 @@ func main() {
 	//our current logging library does not implement
 	//log.Logger
 	//slack.SetLogger(*ll)
-	sc := &karmabot.Slack{
-		Bot: slack.New(*token),
-	}
-	sc.Bot.SetDebug(*debug)
-	sc.RTM = sc.Bot.NewRTM()
-
-	go sc.RTM.ManageConnection()
+	sc := slack.New(*token).NewRTM()
+	sc.SetDebug(*debug)
+	go sc.ManageConnection()
 
 	// karmabot
 
@@ -113,7 +109,7 @@ func main() {
 	go ui.Listen()
 
 	bot := karmabot.New(&karmabot.Config{
-		Slack:            sc,
+		Slack:            &karmabot.SlackChatService{*sc},
 		UI:               ui,
 		Debug:            *debug,
 		MaxPoints:        *maxpoints,
