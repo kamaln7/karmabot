@@ -4,7 +4,7 @@
 
 karmabot is a Slack bot that listens for and performs karma operations (aka upvotes/downvotes).
 
-![usage screenshot](/screenshot.png)  
+<img src="/kamaln7/karmabot/raw/master/screenshot.png" alt="usage screenshot" width="445">
 
 ## Syntax
 
