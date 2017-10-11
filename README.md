@@ -18,6 +18,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
   - `<user>++ for <message>`; or
   - `<user>++ <message>`
 - query a user's current points: `<user>==`
+- upvote/downvote a user by adding reactjis to their message
 - [motivate.im](http://motivate.im/) support:
   - `?m <user>`
   - `!m <user>`
@@ -61,18 +62,20 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 3. run `karmabot`. the following options are supported:
 
 
-| option                  | required? | description                              | default        |
-| ----------------------- | --------- | ---------------------------------------- | -------------- |
-| `-token string`         | **yes**   | slack RTM token                          |                |
-| `-debug=bool`           | no        | set debug mode                           | `false`        |
-| `-db string`            | no        | path to sqlite database                  | `./db.sqlite3` |
-| `-leaderboardlimit int` | no        | the default amount of users to list in the leaderboard | `10`           |
-| `-maxpoints int`        | no        | the maximum amount of points that users can give/take at once | `6`            |
-| `-motivate=bool`        | no        | toggle [motivate.im](http://motivate.im/) support | `true`         |
-| `-blacklist string`     | no        | **may be passed multiple times** blacklist `string`  i.e. ignore karma commands for `string` | `[]`           |
-| `-reactji bool`         | no        | use reactji (👍 and 👎) as reaction events | `true`         |
-| `-alias string`         | no        | **may be passed multiple times** alias different users to one user. syntax: `-alias main++alias1++alias2++...++aliasN` |                |
-| `-selfkarma bool`       | yes       | allow users to add/remove karma to themselves | `true`         |
+| option                      | required? | description                              | default                          |
+| --------------------------- | --------- | ---------------------------------------- | -------------------------------- |
+| `-token string`             | **yes**   | slack RTM token                          |                                  |
+| `-debug=bool`               | no        | set debug mode                           | `false`                          |
+| `-db string`                | no        | path to sqlite database                  | `./db.sqlite3`                   |
+| `-leaderboardlimit int`     | no        | the default amount of users to list in the leaderboard | `10`                             |
+| `-maxpoints int`            | no        | the maximum amount of points that users can give/take at once | `6`                              |
+| `-motivate=bool`            | no        | toggle [motivate.im](http://motivate.im/) support | `true`                           |
+| `-blacklist string`         | no        | **may be passed multiple times** blacklist `string`  i.e. ignore karma commands for `string` | `[]`                             |
+| `-reactji bool`             | no        | use reactji (👍 and 👎) as reaction events | `true`                           |
+| `-reactjis.upvote string`   | no        | **may be passed multiple times** a list of reactjis to use for upvotes. for emojis with aliases, use the first name that is shown in the emoji popup | `+1`, `thumbsup`, `thumbsup_all` |
+| `-reactjis.downvote string` | no        | **may be passed multiple times** a list of reactjis to use for downvotes. for emojis with aliases, use the first name that is shown in the emoji popup | `-1`, `thumbsdown`               |
+| `-alias string`             | no        | **may be passed multiple times** alias different users to one user. syntax: `-alias main++alias1++alias2++...++aliasN` |                                  |
+| `-selfkarma bool`           | yes       | allow users to add/remove karma to themselves | `true`                           |
 
 In addition, see the table below for the options related to the web UI.
 

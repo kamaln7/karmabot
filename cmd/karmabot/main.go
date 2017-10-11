@@ -28,6 +28,8 @@ var (
 	motivate         = flag.Bool("motivate", true, "toggle motivate.im support")
 	blacklist        = make(karmabot.StringList, 0)
 	reactji          = flag.Bool("reactji", true, "use reactji as karma operations")
+	upvotereactji    = make(karmabot.StringList, 0)
+	downvotereactji  = make(karmabot.StringList, 0)
 	aliases          = make(karmabot.StringList, 0)
 	selfkarma        = flag.Bool("selfkarma", true, "allow users to add/remove karma to themselves")
 )
@@ -37,15 +39,32 @@ func main() {
 
 	ll := log.KV("version", karmabot.Version)
 
+	// reactji defaults
+	upvotereactji.Set("+1")
+	upvotereactji.Set("thumbsup")
+	upvotereactji.Set("thumbsup_all")
+	downvotereactji.Set("-1")
+	downvotereactji.Set("thumbsdown")
+
 	// cli flags
 
 	flag.Var(&blacklist, "blacklist", "blacklist users from having karma operations applied on them")
 	flag.Var(&aliases, "alias", "alias different users to one user")
+	flag.Var(&upvotereactji, "reactji.upvote", "a list of reactjis to use for upvotes")
+	flag.Var(&downvotereactji, "reactji.downvote", "a list of reactjis to use for downvotes")
+
 	flag.Parse()
 
 	// startup
 
 	ll.Info("starting karmabot")
+
+	// reactjis
+	reactjiConfig := &karmabot.ReactjiConfig{
+		Enabled:  *reactji,
+		Upvote:   upvotereactji,
+		Downvote: downvotereactji,
+	}
 
 	// format aliases
 	aliasMap := make(karmabot.UserAliases, 0)
@@ -117,7 +136,7 @@ func main() {
 		Log:              ll,
 		DB:               db,
 		UserBlacklist:    blacklist,
-		Reactji:          *reactji,
+		Reactji:          reactjiConfig,
 		Motivate:         *motivate,
 		Aliases:          aliasMap,
 		SelfKarma:        *selfkarma,
