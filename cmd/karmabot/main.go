@@ -39,13 +39,6 @@ func main() {
 
 	ll := log.KV("version", karmabot.Version)
 
-	// reactji defaults
-	upvotereactji.Set("+1")
-	upvotereactji.Set("thumbsup")
-	upvotereactji.Set("thumbsup_all")
-	downvotereactji.Set("-1")
-	downvotereactji.Set("thumbsdown")
-
 	// cli flags
 
 	flag.Var(&blacklist, "blacklist", "blacklist users from having karma operations applied on them")
@@ -60,6 +53,17 @@ func main() {
 	ll.Info("starting karmabot")
 
 	// reactjis
+
+	// reactji defaults
+	if len(upvotereactji) == 0 {
+		upvotereactji.Set("+1")
+		upvotereactji.Set("thumbsup")
+		upvotereactji.Set("thumbsup_all")
+	}
+	if len(downvotereactji) == 0 {
+		downvotereactji.Set("-1")
+		downvotereactji.Set("thumbsdown")
+	}
 	reactjiConfig := &karmabot.ReactjiConfig{
 		Enabled:  *reactji,
 		Upvote:   upvotereactji,
