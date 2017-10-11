@@ -88,7 +88,7 @@ func TestHandleReactionEvent(t *testing.T) {
 				ItemUser: "onehundred_points",
 				Reaction: "+1",
 			},
-			ExpectMessage:    "onehundred_points == 101 (+1 for adding a :thumbsup: reactji)",
+			ExpectMessage:    "onehundred_points == 101 (+1 for adding a :+1: reactji)",
 			ShouldHavePoints: 101,
 		},
 		{
@@ -99,7 +99,7 @@ func TestHandleReactionEvent(t *testing.T) {
 				ItemUser: "onehundred_points",
 				Reaction: "-1",
 			},
-			ExpectMessage:    "onehundred_points == 99 (-1 for adding a :thumbsdown: reactji)",
+			ExpectMessage:    "onehundred_points == 99 (-1 for adding a :-1: reactji)",
 			ShouldHavePoints: 99,
 		},
 		{
@@ -132,7 +132,7 @@ func TestHandleReactionEvent(t *testing.T) {
 				ItemUser: "onehundred_points",
 				Reaction: "+1",
 			},
-			ExpectMessage:    "onehundred_points == 99 (-1 for removing a :thumbsup: reactji)",
+			ExpectMessage:    "onehundred_points == 99 (-1 for removing a :+1: reactji)",
 			ShouldHavePoints: 99,
 		},
 		{
@@ -143,7 +143,7 @@ func TestHandleReactionEvent(t *testing.T) {
 				ItemUser: "onehundred_points",
 				Reaction: "-1",
 			},
-			ExpectMessage:    "onehundred_points == 101 (+1 for removing a :thumbsdown: reactji)",
+			ExpectMessage:    "onehundred_points == 101 (+1 for removing a :-1: reactji)",
 			ShouldHavePoints: 101,
 		},
 		{
@@ -159,7 +159,17 @@ func TestHandleReactionEvent(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		b, cs, db := newBot(&Config{Reactji: !tc.ReacjiDisabled})
+		upvote, downvote := make(StringList, 1), make(StringList, 1)
+		upvote.Set("+1")
+		downvote.Set("-1")
+
+		b, cs, db := newBot(&Config{
+			Reactji: &ReactjiConfig{
+				Enabled:  !tc.ReacjiDisabled,
+				Upvote:   upvote,
+				Downvote: downvote,
+			},
+		})
 
 		if tc.ReactionAddedEvent != nil {
 			b.handleReactionAddedEvent(tc.ReactionAddedEvent)

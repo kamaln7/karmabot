@@ -29,3 +29,10 @@ func (sl *StringList) Set(value string) error {
 	(*sl)[value] = struct{}{}
 	return nil
 }
+
+// Contains checks if the list contains a certain item
+func (sl *StringList) Contains(value string) bool {
+	_, ok := (*sl)[value]
+
+	return ok
+}

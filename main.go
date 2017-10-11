@@ -74,16 +74,23 @@ func (s SlackChatService) IncomingEventsChan() chan slack.RTMEvent {
 // UserAliases is a map of alias -> main username
 type UserAliases map[string]string
 
+// ReactjiConfig contains the configuration for reactji-based votes
+type ReactjiConfig struct {
+	Enabled          bool
+	Upvote, Downvote StringList
+}
+
 // Config contains all the necessary configs for karmabot.
 type Config struct {
-	Slack                               ChatService
-	Debug, Motivate, Reactji, SelfKarma bool
-	MaxPoints, LeaderboardLimit         int
-	Log                                 *log.Log
-	UI                                  ui.Provider
-	DB                                  Database
-	UserBlacklist                       StringList
-	Aliases                             UserAliases
+	Slack                       ChatService
+	Debug, Motivate, SelfKarma  bool
+	MaxPoints, LeaderboardLimit int
+	Log                         *log.Log
+	UI                          ui.Provider
+	DB                          Database
+	UserBlacklist               StringList
+	Aliases                     UserAliases
+	Reactji                     *ReactjiConfig
 }
 
 // A Bot is an instance of karmabot.
@@ -164,7 +171,7 @@ func (b *Bot) handleError(err error, channel, thread string) bool {
 }
 
 func (b *Bot) handleReactionAddedEvent(ev *slack.ReactionAddedEvent) {
-	if !b.Config.Reactji {
+	if !b.Config.Reactji.Enabled {
 		return
 	}
 
@@ -172,22 +179,21 @@ func (b *Bot) handleReactionAddedEvent(ev *slack.ReactionAddedEvent) {
 		points int
 		reason string
 	)
-	switch ev.Reaction {
-	case "+1":
+	switch {
+	case b.Config.Reactji.Upvote.Contains(ev.Reaction):
 		points = +1
-		reason = "adding a :thumbsup: reactji"
-	case "-1":
+	case b.Config.Reactji.Downvote.Contains(ev.Reaction):
 		points = -1
-		reason = "adding a :thumbsdown: reactji"
 	default:
 		return
 	}
 
+	reason = fmt.Sprintf("adding a :%s: reactji", ev.Reaction)
 	b.handleReactionEvent(ev.User, ev.ItemUser, reason, points)
 }
 
 func (b *Bot) handleReactionRemovedEvent(ev *slack.ReactionRemovedEvent) {
-	if !b.Config.Reactji {
+	if !b.Config.Reactji.Enabled {
 		return
 	}
 
@@ -195,17 +201,16 @@ func (b *Bot) handleReactionRemovedEvent(ev *slack.ReactionRemovedEvent) {
 		points int
 		reason string
 	)
-	switch ev.Reaction {
-	case "+1":
+	switch {
+	case b.Config.Reactji.Upvote.Contains(ev.Reaction):
 		points = -1
-		reason = "removing a :thumbsup: reactji"
-	case "-1":
-		points = 1
-		reason = "removing a :thumbsdown: reactji"
+	case b.Config.Reactji.Downvote.Contains(ev.Reaction):
+		points = +1
 	default:
 		return
 	}
 
+	reason = fmt.Sprintf("removing a :%s: reactji", ev.Reaction)
 	b.handleReactionEvent(ev.User, ev.ItemUser, reason, points)
 }
 
