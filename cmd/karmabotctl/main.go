@@ -151,6 +151,17 @@ func main() {
 			},
 			Action: setKarma,
 		},
+		{
+			Name:  "throwback",
+			Usage: "get a karma throwback for a user",
+			Flags: []cli.Flag{
+				dbpath,
+				cli.StringFlag{
+					Name: "user",
+				},
+			},
+			Action: getThrowback,
+		},
 	}
 
 	// main app

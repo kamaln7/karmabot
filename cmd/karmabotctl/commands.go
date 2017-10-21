@@ -7,6 +7,7 @@ import (
 	"github.com/kamaln7/karmabot/ui/webui"
 
 	"fmt"
+
 	"github.com/pquerna/otp/totp"
 	"github.com/urfave/cli"
 )
@@ -198,5 +199,24 @@ func setKarma(c *cli.Context) error {
 
 	ll.KV("user", name).KV("points", points).Info("set karma")
 
+	return nil
+}
+
+func getThrowback(c *cli.Context) error {
+	var (
+		user = c.String("user")
+		db   = getDB(c.String("db"))
+	)
+
+	if user == "" {
+		ll.Fatal("please pass a valid user to the `user` option")
+	}
+
+	throwback, err := db.GetThrowback(user)
+	if err != nil {
+		ll.Err(err).Fatal("could not look up user data")
+	}
+
+	ll.KV("throwback", throwback).Info("got throwback")
 	return nil
 }

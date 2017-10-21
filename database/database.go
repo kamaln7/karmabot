@@ -182,3 +182,18 @@ func (db *DB) GetTotalPoints() (int, error) {
 
 	return res, nil
 }
+
+// GetThrowback returns a random karma operation on a specific user
+func (db *DB) GetThrowback(user string) (*Points, error) {
+	record := &Points{}
+	err := db.SQL.QueryRow("select `from`, `to`, `reason`, `points` from karma where `to` = ? and `id` >= (abs(random()) % (select max(`id`) from karma)) limit 1", user).Scan(&record.From, &record.To, &record.Reason, &record.Points)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return record, nil
+}
