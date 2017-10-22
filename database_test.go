@@ -2,6 +2,7 @@ package karmabot
 
 import (
 	"sort"
+	"time"
 
 	"github.com/kamaln7/karmabot/database"
 )
@@ -73,4 +74,23 @@ func (t *TestDatabase) GetTotalPoints() (int, error) {
 		totalPoints += p
 	}
 	return totalPoints, nil
+}
+
+func (t *TestDatabase) GetThrowback(user string) (*database.Throwback, error) {
+	foundUser := false
+	var points database.Points
+	for _, r := range t.records {
+		if r.To == user {
+			foundUser = true
+			points = r
+		}
+	}
+	if !foundUser {
+		return nil, database.ErrNoSuchUser
+	}
+
+	return &database.Throwback{
+		Points:    points,
+		Timestamp: time.Now(),
+	}, nil
 }
