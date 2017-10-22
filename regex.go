@@ -82,6 +82,7 @@ func (r *karmaRegex) GetThrowback() *regexp.Regexp {
 		[]string{
 			`^karma(?:bot)? (?:throwback) ?(`,
 			r.user,
+			r.autocomplete,
 			`)?$`,
 		},
 		"",

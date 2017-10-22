@@ -361,13 +361,21 @@ func (b *Bot) getThrowback(ev *slack.MessageEvent) {
 		return
 	}
 
-	user, err := b.getUserNameByID(ev.User)
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
-		return
-	}
-
+	var (
+		user string
+		err  error
+	)
 	if match[1] != "" {
-		user = strings.ToLower(match[1])
+		user, err = b.parseUser(match[1])
+		if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+			return
+		}
+		user = strings.ToLower(user)
+	} else {
+		user, err = b.getUserNameByID(ev.User)
+		if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+			return
+		}
 	}
 
 	throwback, err := b.Config.DB.GetThrowback(user)
