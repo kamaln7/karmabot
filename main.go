@@ -1,6 +1,7 @@
 package karmabot
 
 import (
+	"database/sql"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -11,12 +12,13 @@ import (
 	"github.com/kamaln7/karmabot/ui"
 
 	"github.com/aybabtme/log"
+	"github.com/dustin/go-humanize"
 	"github.com/nlopes/slack"
 )
 
 var (
 	regexps = struct {
-		Motivate, GiveKarma, QueryKarma, Leaderboard, URL, SlackUser *regexp.Regexp
+		Motivate, GiveKarma, QueryKarma, Leaderboard, URL, SlackUser, Throwback *regexp.Regexp
 	}{
 		Motivate:    karmaReg.GetMotivate(),
 		GiveKarma:   karmaReg.GetGive(),
@@ -24,6 +26,7 @@ var (
 		Leaderboard: regexp.MustCompile(`^karma(?:bot)? (?:leaderboard|top|highscores) ?([0-9]+)?$`),
 		URL:         regexp.MustCompile(`^karma(?:bot)? (?:url|web|link)?$`),
 		SlackUser:   regexp.MustCompile(`^<@([A-Za-z0-9]+)>$`),
+		Throwback:   karmaReg.GetThrowback(),
 	}
 )
 
@@ -40,6 +43,9 @@ type Database interface {
 
 	// GetTotalPoints returns the total number of points transferred across all users.
 	GetTotalPoints() (int, error)
+
+	// GetThrowback returns a random karma operation on a specific user.
+	GetThrowback(user string) (*database.Throwback, error)
 }
 
 // ChatService is an abstraction around Slack, mostly designed for use in tests.
@@ -267,6 +273,9 @@ func (b *Bot) handleMessageEvent(ev *slack.MessageEvent) {
 	case regexps.Leaderboard.MatchString(ev.Text):
 		b.printLeaderboard(ev)
 
+	case regexps.Throwback.MatchString(ev.Text):
+		b.getThrowback(ev)
+
 	case regexps.QueryKarma.MatchString(ev.Text):
 		b.queryKarma(ev)
 	}
@@ -345,6 +354,40 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 	}
 
 	b.SendMessage(pointsMsg, ev.Channel, ev.ThreadTimestamp)
+}
+
+func (b *Bot) getThrowback(ev *slack.MessageEvent) {
+	match := regexps.Throwback.FindStringSubmatch(ev.Text)
+	if len(match) == 0 {
+		return
+	}
+
+	user, err := b.getUserNameByID(ev.User)
+	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+		return
+	}
+
+	if match[1] != "" {
+		user = strings.ToLower(match[1])
+	}
+
+	throwback, err := b.Config.DB.GetThrowback(user)
+	if err == sql.ErrNoRows {
+		b.SendMessage(fmt.Sprintf("could not find any karma operations for %s", user), ev.Channel, ev.ThreadTimestamp)
+		return
+	}
+
+	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+		return
+	}
+
+	date := humanize.Time(throwback.Timestamp)
+	if throwback.Reason != "" {
+		throwback.Reason = fmt.Sprintf(" for %s", throwback.Reason)
+	}
+	text := fmt.Sprintf("%s received %d points from %s %s%s", munge.Munge(throwback.To), throwback.Points.Points, munge.Munge(throwback.From), date, throwback.Reason)
+
+	b.SendMessage(text, ev.Channel, ev.ThreadTimestamp)
 }
 
 func (b *Bot) getUserPointsMessage(name, reason string, points int) (string, error) {

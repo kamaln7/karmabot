@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/aybabtme/log"
 
@@ -29,6 +30,13 @@ type DB struct {
 type Points struct {
 	From, To, Reason string
 	Points           int
+}
+
+// Throwback is a karma operation that has happened
+type Throwback struct {
+	Points
+
+	Timestamp time.Time
 }
 
 // The Leaderboard lists the top X users.
@@ -184,13 +192,18 @@ func (db *DB) GetTotalPoints() (int, error) {
 }
 
 // GetThrowback returns a random karma operation on a specific user
-func (db *DB) GetThrowback(user string) (*Points, error) {
-	record := &Points{}
-	err := db.SQL.QueryRow("select `from`, `to`, `reason`, `points` from karma where `to` = ? and `id` >= (abs(random()) % (select max(`id`) from karma)) limit 1", user).Scan(&record.From, &record.To, &record.Reason, &record.Points)
+func (db *DB) GetThrowback(user string) (*Throwback, error) {
+	var (
+		record    = &Throwback{}
+		timestamp = ""
+	)
+
+	err := db.SQL.QueryRow("select `from`, `to`, `reason`, `points`, `timestamp` from karma where `to` = ? and `id` >= (abs(random()) % (select max(`id`) from karma)) limit 1", user).Scan(&record.From, &record.To, &record.Reason, &record.Points.Points, &timestamp)
 	if err != nil {
 		return nil, err
 	}
 
+	record.Timestamp, err = time.Parse("2006-01-02 15:04:05", timestamp)
 	if err != nil {
 		return nil, err
 	}
