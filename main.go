@@ -1,7 +1,6 @@
 package karmabot
 
 import (
-	"database/sql"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -372,7 +371,7 @@ func (b *Bot) getThrowback(ev *slack.MessageEvent) {
 	}
 
 	throwback, err := b.Config.DB.GetThrowback(user)
-	if err == sql.ErrNoRows {
+	if err == database.ErrNoSuchUser {
 		b.SendMessage(fmt.Sprintf("could not find any karma operations for %s", user), ev.Channel, ev.ThreadTimestamp)
 		return
 	}

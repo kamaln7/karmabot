@@ -199,7 +199,11 @@ func (db *DB) GetThrowback(user string) (*Throwback, error) {
 	)
 
 	err := db.SQL.QueryRow("select `from`, `to`, `reason`, `points`, `timestamp` from karma where `to` = ? and `id` >= (abs(random()) % (select max(`id`) from karma)) limit 1", user).Scan(&record.From, &record.To, &record.Reason, &record.Points.Points, &timestamp)
-	if err != nil {
+	switch err {
+	case nil:
+	case sql.ErrNoRows:
+		return nil, ErrNoSuchUser
+	default:
 		return nil, err
 	}
 
