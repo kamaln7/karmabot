@@ -76,3 +76,16 @@ func (r *karmaRegex) GetQuery() *regexp.Regexp {
 
 	return regexp.MustCompile(expression)
 }
+
+func (r *karmaRegex) GetThrowback() *regexp.Regexp {
+	expression := strings.Join(
+		[]string{
+			`^karma(?:bot)? (?:throwback) ?(`,
+			r.user,
+			`)?$`,
+		},
+		"",
+	)
+
+	return regexp.MustCompile(expression)
+}

@@ -28,6 +28,9 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 - user aliases:
   - it is possible to alias different usernames to one main username by passing the aliases as a cli option to the karmabot binary. syntax: `-alias main++alias1++alias2++...++aliasN`
   - repeat the option for every alias that you want to configure
+- karma throwback:
+  - `<karma|karmabot> throwback [user]`
+  - returns a random karma operation that happened to a specific user.
 
 **note:** `<user>` does not have to be a Slack username. However, karmabot supports Slack autocompletion and so the following messages are parsed correctly:
 
@@ -124,12 +127,13 @@ A list of all arguments for each command can be printed by running `karmabotctl 
 
 #### karma
 
-| command | arguments                       | description                             |
-| ------- | ------------------------------- | --------------------------------------- |
-| add     | `<from> <to> <reason> <points>` | add karma to a user                     |
-| migrate | `<from> <to>`                   | move a user's karma to another user     |
-| reset   | `<user>`                        | reset a user's karma                    |
-| set     | `<user> <points>`               | set a user's karma to a specific number |
+| command   | arguments                       | description                             |
+| --------- | ------------------------------- | --------------------------------------- |
+| add       | `<from> <to> <reason> <points>` | add karma to a user                     |
+| migrate   | `<from> <to>`                   | move a user's karma to another user     |
+| reset     | `<user>`                        | reset a user's karma                    |
+| set       | `<user> <points>`               | set a user's karma to a specific number |
+| throwback | `<user>`                        | get a karma throwback for a user        |
 
 #### webui
 
