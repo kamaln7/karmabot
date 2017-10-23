@@ -116,6 +116,18 @@ var regexTests = map[regexPattern]regexTestSuite{
 			"karmabot web 194",
 		},
 	},
+	regexPattern{
+		Regex: regexps.Throwback,
+		Name:  "karmabot throwback",
+	}: regexTestSuite{
+		true: []string{
+			"karmabot throwback <@U3494519>",
+			"karmabot throwback <@B34839>",
+			"karmabot throwback @name",
+			"karmabot throwback user",
+			"karmabot throwback",
+		},
+	},
 }
 
 func TestRegexes(t *testing.T) {
