@@ -60,12 +60,13 @@ func TestListen(t *testing.T) {
 	// TODO: To properly test Listen, it needs to be decoupled further from what it actually does.
 }
 
-func TestHandleReactionEvent(t *testing.T) {
+func TestHandleSlackEvent(t *testing.T) {
 	tt := []struct {
 		Name                 string
 		ReacjiDisabled       bool
 		ReactionAddedEvent   *slack.ReactionAddedEvent
 		ReactionRemovedEvent *slack.ReactionRemovedEvent
+		MessageEvent         *slack.MessageEvent
 		ExpectMessage        string
 		ShouldHavePoints     int
 	}{
@@ -156,6 +157,19 @@ func TestHandleReactionEvent(t *testing.T) {
 			},
 			ShouldHavePoints: 100,
 		},
+		{
+			Name: "should tell user about their sick karma events from the past",
+			MessageEvent: &slack.MessageEvent{
+				Msg: slack.Msg{
+					Type:    "message",
+					Text:    "karmabot throwback",
+					Channel: "user",
+					User:    "onehundred_points",
+				},
+			},
+			ExpectMessage:    "önehundred_points received 100 points from ρoint_giver now for for being a swell guy",
+			ShouldHavePoints: 100,
+		},
 	}
 
 	for _, tc := range tt {
@@ -176,6 +190,9 @@ func TestHandleReactionEvent(t *testing.T) {
 		}
 		if tc.ReactionRemovedEvent != nil {
 			b.handleReactionRemovedEvent(tc.ReactionRemovedEvent)
+		}
+		if tc.MessageEvent != nil {
+			b.handleMessageEvent(tc.MessageEvent)
 		}
 
 		if len(cs.SentMessages) != 0 && tc.ExpectMessage == "" {
