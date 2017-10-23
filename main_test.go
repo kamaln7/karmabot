@@ -157,6 +157,19 @@ func TestHandleSlackEvent(t *testing.T) {
 			},
 			ShouldHavePoints: 100,
 		},
+		{
+			Name: "should tell user about their sick karma events from the past",
+			MessageEvent: &slack.MessageEvent{
+				Msg: slack.Msg{
+					Type:    "message",
+					Text:    "karmabot throwback",
+					Channel: "user",
+					User:    "onehundred_points",
+				},
+			},
+			ExpectMessage:    "önehundred_points received 100 points from ρoint_giver now for for being a swell guy",
+			ShouldHavePoints: 100,
+		},
 	}
 
 	for _, tc := range tt {
