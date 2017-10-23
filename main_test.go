@@ -60,12 +60,13 @@ func TestListen(t *testing.T) {
 	// TODO: To properly test Listen, it needs to be decoupled further from what it actually does.
 }
 
-func TestHandleReactionEvent(t *testing.T) {
+func TestHandleSlackEvent(t *testing.T) {
 	tt := []struct {
 		Name                 string
 		ReacjiDisabled       bool
 		ReactionAddedEvent   *slack.ReactionAddedEvent
 		ReactionRemovedEvent *slack.ReactionRemovedEvent
+		MessageEvent         *slack.MessageEvent
 		ExpectMessage        string
 		ShouldHavePoints     int
 	}{
@@ -176,6 +177,9 @@ func TestHandleReactionEvent(t *testing.T) {
 		}
 		if tc.ReactionRemovedEvent != nil {
 			b.handleReactionRemovedEvent(tc.ReactionRemovedEvent)
+		}
+		if tc.MessageEvent != nil {
+			b.handleMessageEvent(tc.MessageEvent)
 		}
 
 		if len(cs.SentMessages) != 0 && tc.ExpectMessage == "" {
