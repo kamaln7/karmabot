@@ -1,0 +1,3 @@
+FROM drone/ca-certs
+COPY karmabot /
+ENTRYPOINT ["/karmabot"]

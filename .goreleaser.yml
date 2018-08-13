@@ -1,0 +1,38 @@
+builds:
+  - binary: karmabot
+    main: ./cmd/karmabot/main.go
+    goos:
+      - darwin
+    goarch:
+      - amd64
+  - binary: karmabotctl
+    main: ./cmd/karmabotctl/main.go
+    goos:
+      - darwin
+    goarch:
+      - amd64
+snapshot:
+  name_template: "{{ .Tag }}-next"
+git:
+  short_hash: true
+dockers:
+  - image: kamaln7/karmabot
+    binary: karmabot
+    dockerfile: ./cmd/karmabot/Dockerfile-goreleaser
+    tag_templates:
+      - "{{ .Version }}"
+      - latest
+  - image: kamaln7/karmabot
+    binary: karmabot
+    dockerfile: ./cmd/karmabot/Dockerfile-webui-goreleaser
+    tag_templates:
+      - "{{ .Version }}-webui"
+      - latest-webui
+    extra_files:
+      - www
+  - image: kamaln7/karmabotctl
+    binary: karmabotctl
+    dockerfile: ./cmd/karmabotctl/Dockerfile-goreleaser
+    tag_templates:
+      - "{{ .Version }}"
+      - latest

@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/kamaln7/karmabot"
-	"github.com/kamaln7/karmabot/database"
+	"github.com/kamaln7/karmabot/ctlcommands"
 
 	"github.com/aybabtme/log"
 	"github.com/urfave/cli"
@@ -15,6 +15,12 @@ var (
 )
 
 func main() {
+	// commands
+
+	cc := &ctlcommands.Commands{
+		Logger: ll,
+	}
+
 	// logging
 
 	ll = log.KV("version", karmabot.Version)
@@ -56,7 +62,7 @@ func main() {
 					Usage: "totp key",
 				},
 			},
-			Action: mktotp,
+			Action: cc.Mktotp,
 		},
 		{
 			Name:  "serve",
@@ -82,7 +88,7 @@ func main() {
 					Usage: "url address for accessing the web ui",
 				},
 			},
-			Action: serve,
+			Action: cc.Serve,
 		},
 	}
 
@@ -107,7 +113,7 @@ func main() {
 					Name: "points",
 				},
 			},
-			Action: addKarma,
+			Action: cc.AddKarma,
 		},
 		{
 			Name:  "migrate",
@@ -124,7 +130,7 @@ func main() {
 					Name: "reason",
 				},
 			},
-			Action: migrateKarma,
+			Action: cc.MigrateKarma,
 		},
 		{
 			Name:  "reset",
@@ -135,7 +141,7 @@ func main() {
 					Name: "user",
 				},
 			},
-			Action: resetKarma,
+			Action: cc.ResetKarma,
 		},
 		{
 			Name:  "set",
@@ -149,7 +155,7 @@ func main() {
 					Name: "points",
 				},
 			},
-			Action: setKarma,
+			Action: cc.SetKarma,
 		},
 		{
 			Name:  "throwback",
@@ -160,7 +166,7 @@ func main() {
 					Name: "user",
 				},
 			},
-			Action: getThrowback,
+			Action: cc.GetThrowback,
 		},
 	}
 
@@ -178,16 +184,4 @@ func main() {
 	}
 
 	app.Run(os.Args)
-}
-
-func getDB(path string) *database.DB {
-	db, err := database.New(&database.Config{
-		Path: path,
-	})
-
-	if err != nil {
-		ll.KV("path", path).Err(err).Fatal("could not open sqlite db")
-	}
-
-	return db
 }

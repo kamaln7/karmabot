@@ -1,0 +1,6 @@
+FROM drone/ca-certs
+COPY karmabot /
+EXPOSE 4000
+ENV KB_WEBUI_LISTENADDR 0.0.0.0:4000
+ENV KB_WEBUI_PATH /www
+ENTRYPOINT ["/karmabot"]
