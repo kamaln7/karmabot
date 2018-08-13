@@ -45,7 +45,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 ### Build from Source
 
 1. clone the repo:
-    1. `git clone -b v1.4.6 https://github.com/kamaln7/karmabot.git`
+    1. `git clone -b v1.5.0 https://github.com/kamaln7/karmabot.git`
 2. run `go get` and then `go build` in `/cmd/karmabot` and `/cmd/karmabotctl`
     1. `cd karmabot`
     2. `go get`
@@ -62,23 +62,23 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 
 1. add a **Slack Bot** integration: `https://team.slack.com/apps/A0F7YS25R-bots`. an avatar is available [here](/avatar.png).
 2. invite `karmabot` to any existing channels and all future channels (this is a limitation of Slack's bot API, unfortunately)
-3. run `karmabot`. the following options are supported:
+3. run `karmabot`. the following options are supported. you can use environment variables as well, but any CLI options you pass will take precedence.
 
 
-| option                      | required? | description                              | default                          |
-| --------------------------- | --------- | ---------------------------------------- | -------------------------------- |
-| `-token string`             | **yes**   | slack RTM token                          |                                  |
-| `-debug=bool`               | no        | set debug mode                           | `false`                          |
-| `-db string`                | no        | path to sqlite database                  | `./db.sqlite3`                   |
-| `-leaderboardlimit int`     | no        | the default amount of users to list in the leaderboard | `10`                             |
-| `-maxpoints int`            | no        | the maximum amount of points that users can give/take at once | `6`                              |
-| `-motivate=bool`            | no        | toggle [motivate.im](http://motivate.im/) support | `true`                           |
-| `-blacklist string`         | no        | **may be passed multiple times** blacklist `string`  i.e. ignore karma commands for `string` | `[]`                             |
-| `-reactji bool`             | no        | use reactji (👍 and 👎) as reaction events | `true`                           |
-| `-reactjis.upvote string`   | no        | **may be passed multiple times** a list of reactjis to use for upvotes. for emojis with aliases, use the first name that is shown in the emoji popup | `+1`, `thumbsup`, `thumbsup_all` |
-| `-reactjis.downvote string` | no        | **may be passed multiple times** a list of reactjis to use for downvotes. for emojis with aliases, use the first name that is shown in the emoji popup | `-1`, `thumbsdown`               |
-| `-alias string`             | no        | **may be passed multiple times** alias different users to one user. syntax: `-alias main++alias1++alias2++...++aliasN` |                                  |
-| `-selfkarma bool`           | yes       | allow users to add/remove karma to themselves | `true`                           |
+| option                      | required? | description                                                  | default                          | env var                |
+| --------------------------- | --------- | ------------------------------------------------------------ | -------------------------------- | ---------------------- |
+| `-token string`             | **yes**   | slack RTM token                                              |                                  | `KB_TOKEN`             |
+| `-debug=bool`               | no        | set debug mode                                               | `false`                          | `KB_DEBUG`             |
+| `-db string`                | no        | path to sqlite database                                      | `./db.sqlite3`                   | `KB_DB`                |
+| `-leaderboardlimit int`     | no        | the default amount of users to list in the leaderboard       | `10`                             | `KB_LEADERBOARDLIMIT`  |
+| `-maxpoints int`            | no        | the maximum amount of points that users can give/take at once | `6`                              | `KB_MAXPOINTS`         |
+| `-motivate=bool`            | no        | toggle [motivate.im](http://motivate.im/) support            | `true`                           | `KB_MOTIVATE`          |
+| `-blacklist string`         | no        | **may be passed multiple times** blacklist `string`  i.e. ignore karma commands for `string` | `[]`                             | `KB_BLACKLIST`         |
+| `-reactji bool`             | no        | use reactji (👍 and 👎) as reaction events                     | `true`                           | `KB_REACTJI`           |
+| `-reactjis.upvote string`   | no        | **may be passed multiple times** a list of reactjis to use for upvotes. for emojis with aliases, use the first name that is shown in the emoji popup | `+1`, `thumbsup`, `thumbsup_all` | `KB_REACTJIS_UPVOTE`   |
+| `-reactjis.downvote string` | no        | **may be passed multiple times** a list of reactjis to use for downvotes. for emojis with aliases, use the first name that is shown in the emoji popup | `-1`, `thumbsdown`               | `KB_REACTJIS_DOWNVOTE` |
+| `-alias string`             | no        | **may be passed multiple times** alias different users to one user. syntax: `-alias main++alias1++alias2++...++aliasN` |                                  | `KB_ALIAS`             |
+| `-selfkarma bool`           | yes       | allow users to add/remove karma to themselves                | `true`                           | `KB_SELFKARMA`         |
 
 In addition, see the table below for the options related to the web UI.
 
@@ -99,14 +99,14 @@ karmabot includes an optional web UI. The web UI uses TOTP tokens for authentica
 
 #### Start karmabot
 
-Once you have performed the steps detailed above, pass the necessary options to the `karmabot` binary:
+Once you have performed the steps detailed above, pass the necessary options to the `karmabot` binary. You can use environment variables as well, but any CLI options you pass will take precedence.
 
-| option                     | required? | description                              | default                               |
-| -------------------------- | --------- | ---------------------------------------- | ------------------------------------- |
-| `-webui.listenaddr string` | **yes**   | the address (`host:port`) on which to serve the web UI |                                       |
-| `-webui.totp string`       | **yes**   | the TOTP key (see above)                 |                                       |
-| `-webui.path string`       | **yes**   | path to the `www` directory (see above)  |                                       |
-| `-webui.url string`        | no        | the URL which karmabot should use to generate links to the web UI (_without_ a trailing slash!) | defaults to `http://webui.listenaddr` |
+| option                     | required? | description                                                  | default                               | env var               |
+| -------------------------- | --------- | ------------------------------------------------------------ | ------------------------------------- | --------------------- |
+| `-webui.listenaddr string` | **yes**   | the address (`host:port`) on which to serve the web UI       |                                       | `KB_WEBUI_LISTENADDR` |
+| `-webui.totp string`       | **yes**   | the TOTP key (see above)                                     |                                       | `KB_WEBUI_TOTP`       |
+| `-webui.path string`       | **yes**   | path to the `www` directory (see above)                      |                                       | `KB_WEBUI_PATH`       |
+| `-webui.url string`        | no        | the URL which karmabot should use to generate links to the web UI (_without_ a trailing slash!) | defaults to `http://webui.listenaddr` | `KB_WEBUI_URL`        |
 
 
 If done correctly, the web UI should be accessible on the `webui.listenaddr` that you have configured. The web UI will not be started if either of `webui.listenaddr` or `webui.path` are missing.

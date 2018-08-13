@@ -11,6 +11,7 @@ import (
 	"github.com/kamaln7/karmabot/ui/webui"
 
 	"github.com/aybabtme/log"
+	"github.com/kamaln7/envy"
 	"github.com/nlopes/slack"
 )
 
@@ -46,6 +47,7 @@ func main() {
 	flag.Var(&upvotereactji, "reactji.upvote", "a list of reactjis to use for upvotes")
 	flag.Var(&downvotereactji, "reactji.downvote", "a list of reactjis to use for downvotes")
 
+	envy.Parse("KB")
 	flag.Parse()
 
 	// startup
