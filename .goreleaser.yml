@@ -2,13 +2,13 @@ builds:
   - binary: karmabot
     main: ./cmd/karmabot/main.go
     goos:
-      - darwin
+      - linux
     goarch:
       - amd64
   - binary: karmabotctl
     main: ./cmd/karmabotctl/main.go
     goos:
-      - darwin
+      - linux
     goarch:
       - amd64
 snapshot:
