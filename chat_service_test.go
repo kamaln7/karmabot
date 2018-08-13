@@ -28,7 +28,7 @@ func (t *TestChatService) GetUserInfo(user string) (*slack.User, error) {
 	}, nil
 }
 
-func (t *TestChatService) NewOutgoingMessage(text string, channel string) *slack.OutgoingMessage {
+func (t *TestChatService) NewOutgoingMessage(text string, channel string, options ...slack.RTMsgOption) *slack.OutgoingMessage {
 	t.id++
 	return &slack.OutgoingMessage{
 		ID:      t.id,

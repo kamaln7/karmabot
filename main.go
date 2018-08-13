@@ -53,7 +53,7 @@ type ChatService interface {
 	IncomingEventsChan() chan slack.RTMEvent
 
 	// NewOutgoingMessage constructs a new OutgoingMessage using the provided text and channel.
-	NewOutgoingMessage(text string, channel string) *slack.OutgoingMessage
+	NewOutgoingMessage(text string, channel string, options ...slack.RTMsgOption) *slack.OutgoingMessage
 
 	// SendMessage sends the provided *OutgoingMessage.
 	SendMessage(msg *slack.OutgoingMessage)
