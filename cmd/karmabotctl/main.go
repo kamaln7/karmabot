@@ -15,15 +15,15 @@ var (
 )
 
 func main() {
+	// logging
+
+	ll = log.KV("version", karmabot.Version)
+
 	// commands
 
 	cc := &ctlcommands.Commands{
 		Logger: ll,
 	}
-
-	// logging
-
-	ll = log.KV("version", karmabot.Version)
 
 	// app
 	app := cli.NewApp()
