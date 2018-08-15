@@ -3,111 +3,153 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:2ba1be2e92248664a083784d42576a7687a1f9b724c0b2a428ca9f0fa3b210a4"
   name = "github.com/aybabtme/log"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ba6ae9871c28975af1258af63333e8500f1c8357"
 
 [[projects]]
+  digest = "1:7b94d37d65c0445053c6f3e73090e3966c1c29127035492c349e14f25c440359"
   name = "github.com/boombuler/barcode"
   packages = [
     ".",
     "qr",
-    "utils"
+    "utils",
   ]
+  pruneopts = "UT"
   revision = "3cfea5ab600ae37946be2b763b8ec2c1cf2d272d"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:6f9339c912bbdda81302633ad7e99a28dfa5a639c864061f1929510a9a64aa74"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
+  pruneopts = "UT"
   revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
 
 [[projects]]
+  digest = "1:0cfcded8689c2c964c223650009c5dd9e283c22d57f18f2335aafa16cc22acf1"
   name = "github.com/go-kit/kit"
   packages = ["log"]
+  pruneopts = "UT"
   revision = "ca4112baa34cb55091301bdc13b1420a122b1b9e"
   version = "v0.7.0"
 
 [[projects]]
+  digest = "1:31a18dae27a29aa074515e43a443abfd2ba6deb6d69309d8d7ce789c45f34659"
   name = "github.com/go-logfmt/logfmt"
   packages = ["."]
+  pruneopts = "UT"
   revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:c4a2528ccbcabf90f9f3c464a5fc9e302d592861bbfd0b7135a7de8a943d0406"
   name = "github.com/go-stack/stack"
   packages = ["."]
+  pruneopts = "UT"
   revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
   version = "v1.7.0"
 
 [[projects]]
+  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
   name = "github.com/gorilla/context"
   packages = ["."]
+  pruneopts = "UT"
   revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:e73f5b0152105f18bc131fba127d9949305c8693f8a762588a82a48f61756f5f"
   name = "github.com/gorilla/mux"
   packages = ["."]
+  pruneopts = "UT"
   revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
   version = "v1.6.2"
 
 [[projects]]
+  digest = "1:43dd08a10854b2056e615d1b1d22ac94559d822e1f8b6fcc92c1a1057e85188e"
   name = "github.com/gorilla/websocket"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:e0fda8cfabc9d21a5402d2575bb97470a4bf2f21c88e8c43ef7e37fdad36ae0c"
   name = "github.com/kamaln7/envy"
   packages = ["."]
-  revision = "0bbd0e6a316f4aedb2fcb3eaaabd3e89d88d606f"
-  version = "v1.0.0"
+  pruneopts = "UT"
+  revision = "29534b92be2db456812867a50ecfe52198c5a8dd"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:a64e323dc06b73892e5bb5d040ced475c4645d456038333883f58934abbf6f72"
   name = "github.com/kr/logfmt"
   packages = ["."]
+  pruneopts = "UT"
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
 
 [[projects]]
+  digest = "1:3cafc6a5a1b8269605d9df4c6956d43d8011fc57f266ca6b9d04da6c09dee548"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
+  pruneopts = "UT"
   revision = "25ecb14adfc7543176f7d85291ec7dba82c6f7e4"
   version = "v1.9.0"
 
 [[projects]]
+  digest = "1:ace662a36243b5cdc2f71e654175dc192f903fafbf3411a95bc910c1cad53ce7"
   name = "github.com/nlopes/slack"
   packages = ["."]
+  pruneopts = "UT"
   revision = "0db1d5eae1116bf7c8ed96c6749acfbf4daaec3e"
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:6c7a3f738e37a1c7ad3d56122a34932140654d51a57e01f8613cdf3eaf050911"
   name = "github.com/pquerna/otp"
   packages = [
     ".",
     "hotp",
-    "totp"
+    "totp",
   ]
+  pruneopts = "UT"
   revision = "b7b89250c468c06871d3837bee02e2d5c155ae19"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
+  pruneopts = "UT"
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:b24d38b282bacf9791408a080f606370efa3d364e4b5fd9ba0f7b87786d3b679"
   name = "github.com/urfave/cli"
   packages = ["."]
+  pruneopts = "UT"
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
   version = "v1.20.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "04c94a304f19f30ad66d761b754810ff993654fe41aef3db03ca4a73361dfc5c"
+  input-imports = [
+    "github.com/aybabtme/log",
+    "github.com/dustin/go-humanize",
+    "github.com/gorilla/mux",
+    "github.com/kamaln7/envy",
+    "github.com/mattn/go-sqlite3",
+    "github.com/nlopes/slack",
+    "github.com/pquerna/otp/totp",
+    "github.com/satori/go.uuid",
+    "github.com/urfave/cli",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

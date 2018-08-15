@@ -1,12 +1,14 @@
 builds:
   - binary: karmabot
     main: ./cmd/karmabot/main.go
+    ldflags: -s -extldflags "-static"
     goos:
       - linux
     goarch:
       - amd64
   - binary: karmabotctl
     main: ./cmd/karmabotctl/main.go
+    ldflags: -s -extldflags "-static"
     goos:
       - linux
     goarch:
