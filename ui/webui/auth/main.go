@@ -111,12 +111,12 @@ func (a *Authenticator) ExpireClients() {
 		now := time.Now()
 
 		a.clientsMutex.Lock()
-		defer a.clientsMutex.Unlock()
 		for i := len(a.authedClients) - 1; i >= 0; i-- {
 			if now.Sub(a.authedClients[i].Added).Hours() >= 48 {
 				a.authedClients = append(a.authedClients[:i], a.authedClients[i+1:]...)
 			}
 		}
+		a.clientsMutex.Unlock()
 	}
 }
 
