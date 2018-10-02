@@ -107,23 +107,16 @@ func (a *Authenticator) hasValidToken(r *http.Request) bool {
 func (a *Authenticator) ExpireClients() {
 	for {
 		<-time.After(2 * time.Minute)
-		go func() {
-			now := time.Now()
 
-			a.clientsMutex.RLock()
-			for i, client := range a.authedClients {
-				if now.Sub(client.Added).Hours() >= 48 {
-					a.clientsMutex.RUnlock()
-					a.clientsMutex.Lock()
+		now := time.Now()
 
-					a.authedClients = append(a.authedClients[:i], a.authedClients[i+1:]...)
-
-					a.clientsMutex.Unlock()
-					a.clientsMutex.RLock()
-				}
+		a.clientsMutex.Lock()
+		defer a.clientsMutex.Unlock()
+		for i := len(a.authedClients) - 1; i >= 0; i-- {
+			if now.Sub(a.authedClients[i].Added).Hours() >= 48 {
+				a.authedClients = append(a.authedClients[:i], a.authedClients[i+1:]...)
 			}
-			a.clientsMutex.RUnlock()
-		}()
+		}
 	}
 }
 
