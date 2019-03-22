@@ -2,6 +2,7 @@ package karmabot
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -133,6 +134,7 @@ func (b *Bot) Listen() {
 		case *slack.InvalidAuthEvent:
 			b.Config.Log.Fatal("invalid slack token")
 		default:
+			b.Config.Log.KV("data", msg.Data).KV("event", reflect.TypeOf(msg.Data)).Info("unexpected slack api event")
 		}
 	}
 }

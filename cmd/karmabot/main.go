@@ -106,8 +106,7 @@ func main() {
 	//our current logging library does not implement
 	//log.Logger
 	//slack.SetLogger(*ll)
-	sc := slack.New(*token).NewRTM()
-	sc.SetDebug(*debug)
+	sc := slack.New(*token, slack.OptionDebug(*debug)).NewRTM()
 	go sc.ManageConnection()
 
 	// karmabot
