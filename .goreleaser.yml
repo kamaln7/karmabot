@@ -6,6 +6,8 @@ builds:
       - linux
     goarch:
       - amd64
+    env:
+      - CGO_ENABLED=0
   - binary: karmabotctl
     main: ./cmd/karmabotctl/main.go
     ldflags: -s -w -extldflags "-static" -X "github.com/kamaln7/karmabot.Version={{.Version}}"
@@ -13,6 +15,8 @@ builds:
       - linux
     goarch:
       - amd64
+    env:
+      - CGO_ENABLED=0
 snapshot:
   name_template: "{{ .Tag }}-next"
 dockers:
