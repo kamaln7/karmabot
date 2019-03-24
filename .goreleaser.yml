@@ -1,14 +1,14 @@
 builds:
   - binary: karmabot
     main: ./cmd/karmabot/main.go
-    ldflags: -s -w -extldflags "-static" -X "github.com/kamaln7/karmabot.Version={{.Version}}"
+    ldflags: -s -w -X "github.com/kamaln7/karmabot.Version={{.Version}}"
     goos:
       - linux
     goarch:
       - amd64
   - binary: karmabotctl
     main: ./cmd/karmabotctl/main.go
-    ldflags: -s -w -extldflags "-static" -X "github.com/kamaln7/karmabot.Version={{.Version}}"
+    ldflags: -s -w -X "github.com/kamaln7/karmabot.Version={{.Version}}"
     goos:
       - linux
     goarch:
