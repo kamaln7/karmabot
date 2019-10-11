@@ -33,6 +33,7 @@ var (
 	downvotereactji  = make(karmabot.StringList, 0)
 	aliases          = make(karmabot.StringList, 0)
 	selfkarma        = flag.Bool("selfkarma", true, "allow users to add/remove karma to themselves")
+	replytype        = flag.String("replytype", "message", "how to reply to commands (message, thread)")
 )
 
 func main() {
@@ -145,6 +146,7 @@ func main() {
 		Motivate:         *motivate,
 		Aliases:          aliasMap,
 		SelfKarma:        *selfkarma,
+		ReplyType:        *replytype,
 	})
 
 	bot.Listen()

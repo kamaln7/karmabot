@@ -97,6 +97,7 @@ type Config struct {
 	UserBlacklist               StringList
 	Aliases                     UserAliases
 	Reactji                     *ReactjiConfig
+	ReplyType                   string
 }
 
 // A Bot is an instance of karmabot.
@@ -139,6 +140,28 @@ func (b *Bot) Listen() {
 	}
 }
 
+func (b *Bot) getReplyThread(message *slack.MessageEvent) string {
+	var thread string
+
+	switch b.Config.ReplyType {
+	case "message":
+		thread = message.ThreadTimestamp
+	case "thread":
+		if message.ThreadTimestamp != "" {
+			thread = message.ThreadTimestamp
+		} else {
+			thread = message.Timestamp
+		}
+	}
+
+	return thread
+}
+
+// SendReply sends a reply to a message, either as a new message in the channel or a thread (configurable)
+func (b *Bot) SendReply(reply string, message *slack.MessageEvent) {
+	b.SendMessage(reply, message.Channel, b.getReplyThread(message))
+}
+
 // SendMessage sends a message to a Slack channel.
 func (b *Bot) SendMessage(message, channel, thread string) {
 	msg := b.Config.Slack.NewOutgoingMessage(message, channel)
@@ -157,21 +180,21 @@ func (b *Bot) DMUser(message, user string) {
 	b.SendMessage(message, channel, "")
 }
 
-func (b *Bot) handleError(err error, channel, thread string) bool {
+func (b *Bot) handleError(err error, message *slack.MessageEvent) bool {
 	if err == nil {
 		return false
 	}
 
 	b.Config.Log.Err(err).Error("error")
-	if channel != "" {
-		var message string
+	if message != nil {
+		var text string
 		if b.Config.Debug {
-			message = err.Error()
+			text = err.Error()
 		} else {
-			message = "an error has occurred."
+			text = "an error has occurred."
 		}
 
-		b.SendMessage(message, channel, thread)
+		b.SendReply(text, message)
 	}
 
 	return true
@@ -223,11 +246,11 @@ func (b *Bot) handleReactionRemovedEvent(ev *slack.ReactionRemovedEvent) {
 
 func (b *Bot) handleReactionEvent(fromID, toID, reason string, points int) {
 	from, err := b.getUserNameByID(fromID)
-	if b.handleError(err, "", "") {
+	if b.handleError(err, nil) {
 		return
 	}
 	to, err := b.getUserNameByID(toID)
-	if b.handleError(err, "", "") {
+	if b.handleError(err, nil) {
 		return
 	}
 	from, to = strings.ToLower(from), strings.ToLower(to)
@@ -240,12 +263,12 @@ func (b *Bot) handleReactionEvent(fromID, toID, reason string, points int) {
 	}
 
 	err = b.Config.DB.InsertPoints(record)
-	if b.handleError(err, "", "") {
+	if b.handleError(err, nil) {
 		return
 	}
 
 	pointsMsg, err := b.getUserPointsMessage(to, reason, points)
-	if b.handleError(err, "", "") {
+	if b.handleError(err, nil) {
 		return
 	}
 
@@ -284,7 +307,7 @@ func (b *Bot) handleMessageEvent(ev *slack.MessageEvent) {
 
 func (b *Bot) printURL(ev *slack.MessageEvent) {
 	url, err := b.Config.UI.GetURL("/")
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 
@@ -293,7 +316,7 @@ func (b *Bot) printURL(ev *slack.MessageEvent) {
 		return
 	}
 
-	b.SendMessage(url, ev.Channel, ev.ThreadTimestamp)
+	b.SendReply(url, ev)
 }
 
 func (b *Bot) givePoints(ev *slack.MessageEvent) {
@@ -312,11 +335,11 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 	}
 
 	from, err := b.getUserNameByID(ev.User)
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 	to, err := b.parseUser(match[1])
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 	to = strings.ToLower(to)
@@ -333,7 +356,7 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 	reason := match[3]
 
 	if !b.Config.SelfKarma && from == to {
-		b.SendMessage("Sorry, you are not allowed to do that.", ev.Channel, ev.ThreadTimestamp)
+		b.SendReply("Sorry, you are not allowed to do that.", ev)
 		return
 	}
 
@@ -345,16 +368,16 @@ func (b *Bot) givePoints(ev *slack.MessageEvent) {
 	}
 
 	err = b.Config.DB.InsertPoints(record)
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 
 	pointsMsg, err := b.getUserPointsMessage(to, reason, points)
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 
-	b.SendMessage(pointsMsg, ev.Channel, ev.ThreadTimestamp)
+	b.SendReply(pointsMsg, ev)
 }
 
 func (b *Bot) getThrowback(ev *slack.MessageEvent) {
@@ -369,24 +392,24 @@ func (b *Bot) getThrowback(ev *slack.MessageEvent) {
 	)
 	if match[1] != "" {
 		user, err = b.parseUser(match[1])
-		if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+		if b.handleError(err, ev) {
 			return
 		}
 		user = strings.ToLower(user)
 	} else {
 		user, err = b.getUserNameByID(ev.User)
-		if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+		if b.handleError(err, ev) {
 			return
 		}
 	}
 
 	throwback, err := b.Config.DB.GetThrowback(user)
 	if err == database.ErrNoSuchUser {
-		b.SendMessage(fmt.Sprintf("could not find any karma operations for %s", user), ev.Channel, ev.ThreadTimestamp)
+		b.SendReply(fmt.Sprintf("could not find any karma operations for %s", user), ev)
 		return
 	}
 
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 
@@ -396,7 +419,7 @@ func (b *Bot) getThrowback(ev *slack.MessageEvent) {
 	}
 	text := fmt.Sprintf("%s received %d points from %s %s%s", munge.Munge(throwback.To), throwback.Points.Points, munge.Munge(throwback.From), date, throwback.Reason)
 
-	b.SendMessage(text, ev.Channel, ev.ThreadTimestamp)
+	b.SendReply(text, ev)
 }
 
 func (b *Bot) getUserPointsMessage(name, reason string, points int) (string, error) {
@@ -430,7 +453,7 @@ func (b *Bot) printLeaderboard(ev *slack.MessageEvent) {
 	if match[1] != "" {
 		var err error
 		limit, err = strconv.Atoi(match[1])
-		if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+		if b.handleError(err, ev) {
 			return
 		}
 	}
@@ -438,7 +461,7 @@ func (b *Bot) printLeaderboard(ev *slack.MessageEvent) {
 	text := fmt.Sprintf("*top %d leaderboard*\n", limit)
 
 	url, err := b.Config.UI.GetURL(fmt.Sprintf("/leaderboard/%d", limit))
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 	if url != "" {
@@ -446,7 +469,7 @@ func (b *Bot) printLeaderboard(ev *slack.MessageEvent) {
 	}
 
 	leaderboard, err := b.Config.DB.GetLeaderboard(limit)
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 
@@ -454,7 +477,7 @@ func (b *Bot) printLeaderboard(ev *slack.MessageEvent) {
 		text += fmt.Sprintf("%d. %s == %d\n", i+1, munge.Munge(user.Name), user.Points)
 	}
 
-	b.SendMessage(text, ev.Channel, ev.ThreadTimestamp)
+	b.SendReply(text, ev)
 }
 
 func (b *Bot) parseUser(user string) (string, error) {
@@ -490,7 +513,7 @@ func (b *Bot) queryKarma(ev *slack.MessageEvent) {
 	}
 
 	name, err := b.parseUser(match[1])
-	if b.handleError(err, ev.Channel, ev.ThreadTimestamp) {
+	if b.handleError(err, ev) {
 		return
 	}
 	name = strings.ToLower(name)
@@ -499,9 +522,9 @@ func (b *Bot) queryKarma(ev *slack.MessageEvent) {
 	switch {
 	case err == database.ErrNoSuchUser:
 		// override debug mode
-		b.SendMessage(err.Error(), ev.Channel, ev.ThreadTimestamp)
-	case b.handleError(err, ev.Channel, ev.ThreadTimestamp):
+		b.SendReply(err.Error(), ev)
+	case b.handleError(err, ev):
 	default:
-		b.SendMessage(fmt.Sprintf("%s == %d", user.Name, user.Points), ev.Channel, ev.ThreadTimestamp)
+		b.SendReply(fmt.Sprintf("%s == %d", user.Name, user.Points), ev)
 	}
 }
