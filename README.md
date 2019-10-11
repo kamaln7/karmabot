@@ -58,10 +58,8 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
     1. `git clone -b v1.5.2 https://github.com/kamaln7/karmabot.git`
     2. `cd karmabot`
 2. install dependencies
-    1. [install dep](https://golang.github.io/dep/docs/installation.html)
-    2. run `dep ensure`
+    1. run `go mod download`
 3. run `go build` in `/cmd/karmabot` and `/cmd/karmabotctl`
-    1. `go get`
     2. `cd cmd/karmabot`
     3. `go build`
     4. `cd ../karmabotctl`
