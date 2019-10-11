@@ -1,12 +1,14 @@
 builds:
-  - binary: karmabot
+  - id: karmabot
+    binary: karmabot
     main: ./cmd/karmabot/main.go
     ldflags: -s -w -X "github.com/kamaln7/karmabot.Version={{.Version}}"
     goos:
       - linux
     goarch:
       - amd64
-  - binary: karmabotctl
+  - id: karmabotctl
+    binary: karmabotctl
     main: ./cmd/karmabotctl/main.go
     ldflags: -s -w -X "github.com/kamaln7/karmabot.Version={{.Version}}"
     goos:
@@ -16,19 +18,22 @@ builds:
 snapshot:
   name_template: "{{ .Tag }}-next"
 dockers:
-  - binary: karmabot
+  - binaries:
+      - karmabot
     dockerfile: ./cmd/karmabot/Dockerfile-goreleaser
     image_templates:
       - "kamaln7/karmabot:{{ .Version }}"
       - "kamaln7/karmabot:latest"
-  - binary: karmabot
+  - binaries:
+      - karmabot
     dockerfile: ./cmd/karmabot/Dockerfile-webui-goreleaser
     image_templates:
       - "kamaln7/karmabot:{{ .Version }}-webui"
       - "kamaln7/karmabot:latest-webui"
     extra_files:
       - www
-  - binary: karmabotctl
+  - binaries:
+      - karmabotctl
     dockerfile: ./cmd/karmabotctl/Dockerfile-goreleaser
     image_templates:
       - "kamaln7/karmabotctl:{{ .Version }}"
