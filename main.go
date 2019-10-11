@@ -65,6 +65,9 @@ type ChatService interface {
 
 	// GetUserInfo retrieves the complete user information for the specified username.
 	GetUserInfo(user string) (*slack.User, error)
+
+	// PostEphemeral sends an ephemeral message to a user in a channel.
+	PostEphemeral(channelID, userID string, options ...slack.MsgOption) (string, error)
 }
 
 // SlackChatService is an implementation of ChatService using github.com/nlopes/slack.
@@ -159,7 +162,22 @@ func (b *Bot) getReplyThread(message *slack.MessageEvent) string {
 
 // SendReply sends a reply to a message, either as a new message in the channel or a thread (configurable)
 func (b *Bot) SendReply(reply string, message *slack.MessageEvent) {
-	b.SendMessage(reply, message.Channel, b.getReplyThread(message))
+	switch b.Config.ReplyType {
+	case "ephemeral":
+		b.SendReplyEphemeral(reply, message)
+	default:
+		b.SendMessage(reply, message.Channel, b.getReplyThread(message))
+	}
+}
+
+// SendReplyEphemeral sends a reply to a message as an ephemeral message to the user
+func (b *Bot) SendReplyEphemeral(reply string, message *slack.MessageEvent) {
+	b.SendMessageEphemeral(message.Channel, message.User, reply, message.ThreadTimestamp)
+}
+
+// SendMessageEphemeral sends an ephemeral message to a user
+func (b *Bot) SendMessageEphemeral(reply, channel, user, thread string) {
+	b.Config.Slack.PostEphemeral(channel, user, slack.MsgOptionText(reply, false), slack.MsgOptionTS(thread))
 }
 
 // SendMessage sends a message to a Slack channel.
@@ -218,8 +236,8 @@ func (b *Bot) handleReactionAddedEvent(ev *slack.ReactionAddedEvent) {
 		return
 	}
 
-	reason = fmt.Sprintf("adding a :%s: reactji", ev.Reaction)
-	b.handleReactionEvent(ev.User, ev.ItemUser, reason, points)
+	reason = fmt.Sprintf("added a :%s: reactji", ev.Reaction)
+	b.handleReactionEvent(ev, reason, points)
 }
 
 func (b *Bot) handleReactionRemovedEvent(ev *slack.ReactionRemovedEvent) {
@@ -240,21 +258,28 @@ func (b *Bot) handleReactionRemovedEvent(ev *slack.ReactionRemovedEvent) {
 		return
 	}
 
-	reason = fmt.Sprintf("removing a :%s: reactji", ev.Reaction)
-	b.handleReactionEvent(ev.User, ev.ItemUser, reason, points)
+	reason = fmt.Sprintf("removed a :%s: reactji", ev.Reaction)
+	b.handleReactionEvent((*slack.ReactionAddedEvent)(ev), reason, points)
 }
 
-func (b *Bot) handleReactionEvent(fromID, toID, reason string, points int) {
-	from, err := b.getUserNameByID(fromID)
+// at this point there is no difference between ReactionAddedEvent and ReactionRemovedEvent
+func (b *Bot) handleReactionEvent(ev *slack.ReactionAddedEvent, reason string, points int) {
+	// look up usernames
+	from, err := b.getUserNameByID(ev.User)
 	if b.handleError(err, nil) {
 		return
 	}
-	to, err := b.getUserNameByID(toID)
+	to, err := b.getUserNameByID(ev.ItemUser)
 	if b.handleError(err, nil) {
 		return
 	}
+
+	// add the actor's username to the reason
+	reason = fmt.Sprintf("%s %s", from, reason)
+
 	from, to = strings.ToLower(from), strings.ToLower(to)
 
+	// insert points
 	record := &database.Points{
 		From:   from,
 		To:     to,
@@ -272,7 +297,8 @@ func (b *Bot) handleReactionEvent(fromID, toID, reason string, points int) {
 		return
 	}
 
-	b.DMUser(pointsMsg, fromID)
+	// reply as ephemeral message
+	b.SendMessageEphemeral(pointsMsg, ev.Item.Channel, ev.User, "")
 }
 
 func (b *Bot) handleMessageEvent(ev *slack.MessageEvent) {

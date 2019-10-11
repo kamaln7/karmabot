@@ -86,7 +86,7 @@ karmabot is a Slack bot that listens for and performs karma operations (aka upvo
 | `-reactjis.downvote string` | no        | **may be passed multiple times** a list of reactjis to use for downvotes. for emojis with aliases, use the first name that is shown in the emoji popup | `-1`, `thumbsdown`               | `KB_REACTJIS_DOWNVOTE` |
 | `-alias string`             | no        | **may be passed multiple times** alias different users to one user. syntax: `-alias main++alias1++alias2++...++aliasN` |                                  | `KB_ALIAS`             |
 | `-selfkarma bool`           | no       | allow users to add/remove karma to themselves                | `true`                           | `KB_SELFKARMA`         |
-| `-replytype string`           | no       | whether to reply in channel (`message`) or in a new thread under the user's message (`thread`)                | `message`                           | `KB_REPLYTYPE`         |
+| `-replytype string`           | no       | whether to reply in channel (`message`), in a new thread under the user's message (`thread`), or only visible to the acting user (`ephemeral`)                | `message`                           | `KB_REPLYTYPE`         |
 
 In addition, see the table below for the options related to the web UI.
 

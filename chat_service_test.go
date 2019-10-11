@@ -41,3 +41,7 @@ func (t *TestChatService) NewOutgoingMessage(text string, channel string, option
 func (t *TestChatService) SendMessage(m *slack.OutgoingMessage) {
 	t.SentMessages = append(t.SentMessages, m)
 }
+
+func (t *TestChatService) PostEphemeral(channelID, userID string, options ...slack.MsgOption) (string, error) {
+	panic("Unimplemented")
+}
