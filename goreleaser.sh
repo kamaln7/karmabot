@@ -9,4 +9,5 @@ docker run \
 	-v $HOME/.config/goreleaser/github_token:/root/.config/goreleaser/github_token \
     	-v $HOME/.docker/config.json:/root/.docker/config.json \
 	-w /go/src/github.com/kamaln7/karmabot \
+	-e GITHUB_TOKEN \
 	karmabot-build-env $@
