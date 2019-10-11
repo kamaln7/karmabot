@@ -1,6 +1,8 @@
 package karmabot
 
-import "github.com/nlopes/slack"
+import (
+	"github.com/nlopes/slack"
+)
 
 type TestChatService struct {
 	IncomingEvents chan slack.RTMEvent
@@ -43,5 +45,15 @@ func (t *TestChatService) SendMessage(m *slack.OutgoingMessage) {
 }
 
 func (t *TestChatService) PostEphemeral(channelID, userID string, options ...slack.MsgOption) (string, error) {
-	panic("Unimplemented")
+	// run options
+	_, values, _ := slack.UnsafeApplyMsgOptions("", "", options...)
+	message := values.Get("text")
+
+	t.SendMessage(
+		t.NewOutgoingMessage(
+			message, "user",
+		),
+	)
+
+	return "", nil
 }
