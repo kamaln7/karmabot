@@ -454,12 +454,16 @@ func (b *Bot) getUserPointsMessage(name, reason string, points int) (string, err
 		return "", err
 	}
 
-	text := fmt.Sprintf("%s == %d (", name, user.Points)
+	text := fmt.Sprintf("%s has %d rolls of :tp: (", name, user.Points)
 
-	if points > 0 {
-		text += "+"
+	absPoints := points
+	if absPoints < 0 {
+		absPoints = -absPoints
+		text += "took away "
+	} else {
+		text += "gave "
 	}
-	text = fmt.Sprintf("%s%d", text, points)
+	text += strings.Repeat(":tp:", absPoints)
 
 	if reason != "" {
 		text += fmt.Sprintf(" for %s", reason)
